@@ -15,45 +15,65 @@ class GameScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Game Screen'), 
         actions: [
-          IconButton(
-            icon: Icon(Icons.pause),
-            onPressed: () {
-              // ... Handle pausing the game ...
+          Consumer<GameState>(
+            builder: (context, gameState, child) {
+              return IconButton(
+                icon: Icon(gameState.isPaused ? Icons.play_arrow : Icons.pause),
+                onPressed: () {
+                  // Toggle game pause state
+                  if (gameState.isPaused) {
+                    gameState.resumeGame();
+                  } else {
+                    gameState.pauseGame();
+                  }
+                },
+              );
             },
           ),
           IconButton(
             icon: Icon(Icons.home),
             onPressed: () {
-             // ... Return to main menu ... 
-             Navigator.pushReplacementNamed(context, AppRoutes.mainMenu);
+              // Optionally pause the game before leaving the screen
+              Provider.of<GameState>(context, listen: false).pauseGame();
+              // Return to main menu
+              Navigator.pushReplacementNamed(context, AppRoutes.mainMenu);
             },
-          )
+          ),
         ],
-        // title: Consumer<GameState>( // Update app bar elements dynamically
-        //   builder: (context, gameState, child) {
-        //     return Text('Score: ${gameState.score} - Level: ${gameState.currentLevel}'); 
-        //   },
-        // ),
       ),
       body: Consumer<GameState>(
         builder: (context, gameState, child) {
           return Column(
             children: [
-              Expanded( // Guest Profiles
-                flex: 2, // give more space to the guests
-                child: ListView.builder(
-                  itemCount: gameState.currentGuests.length,
-                  itemBuilder: (context, index) => GuestProfileWidget(guest: gameState.currentGuests[index]),
+              Expanded(
+                flex: 2,
+                child: ShaderMask(
+                  shaderCallback: (Rect bounds) {
+                    return LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.white, Colors.transparent, Colors.transparent, Colors.white],
+                      stops: [0.0, 0.1, 0.9, 1.0],
+                    ).createShader(bounds);
+                  },
+                  blendMode: BlendMode.dstOut,
+                  child: Scrollbar(
+                   // isAlwaysShown: true,
+                    child: ListView.builder(
+                      itemCount: gameState.currentGuests.length,
+                      itemBuilder: (context, index) => GuestProfileWidget(guest: gameState.currentGuests[index]),
+                    ),
+                  ),
                 ),
               ),
-              Expanded( // Ingredient Inventory 
-                flex: 3, // give more space to the ingredients
+              Expanded(
+                flex: 3,
                 child: Wrap(
                   children: gameState.availableIngredients.map((ingredient) => IngredientWidget(ingredient)).toList(),
                 ),
               ),
               PreparationArea(),
-              WasteMeter(wasteLevel: gameState.wasteAmount)
+              WasteMeter(wasteLevel: gameState.wasteAmount),
             ],
           );
         },
@@ -61,3 +81,66 @@ class GameScreen extends StatelessWidget {
     );
   }
 }
+
+// class GameScreen extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Game Screen'), 
+//         actions: [
+//           Consumer<GameState>(
+//             builder: (context, gameState, child) {
+//               return IconButton(
+//                 icon: Icon(gameState.isPaused ? Icons.play_arrow : Icons.pause),
+//                 onPressed: () {
+//                   // toggle game pause state
+//                   if (gameState.isPaused) {
+//                     gameState.resumeGame();
+//                   } else {
+//                     gameState.pauseGame();
+//                   }
+//                 },
+//               );
+//             },
+//           ),
+//           IconButton(
+//             icon: Icon(Icons.home),
+//             onPressed: () {
+//              // ... Return to main menu ... 
+//              Navigator.pushReplacementNamed(context, AppRoutes.mainMenu);
+//             },
+//           )
+//         ],
+//         // title: Consumer<GameState>( // Update app bar elements dynamically
+//         //   builder: (context, gameState, child) {
+//         //     return Text('Score: ${gameState.score} - Level: ${gameState.currentLevel}'); 
+//         //   },
+//         // ),
+//       ),
+//       body: Consumer<GameState>(
+//         builder: (context, gameState, child) {
+//           return Column(
+//             children: [
+//               Expanded( // Guest Profiles
+//                 flex: 2, // give more space to the guests
+//                 child: ListView.builder(
+//                   itemCount: gameState.currentGuests.length,
+//                   itemBuilder: (context, index) => GuestProfileWidget(guest: gameState.currentGuests[index]),
+//                 ),
+//               ),
+//               Expanded( // Ingredient Inventory 
+//                 flex: 3, // give more space to the ingredients
+//                 child: Wrap(
+//                   children: gameState.availableIngredients.map((ingredient) => IngredientWidget(ingredient)).toList(),
+//                 ),
+//               ),
+//               PreparationArea(),
+//               WasteMeter(wasteLevel: gameState.wasteAmount),
+//             ],
+//           );
+//         },
+//       ),
+//     );
+//   }
+// }

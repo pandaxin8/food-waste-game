@@ -10,17 +10,21 @@ class GameState with ChangeNotifier {
   List<Ingredient> _availableIngredients = [];
   List<Guest> _currentGuests = [];
 
+  bool _isPaused = false;
+  bool get isPaused => _isPaused;
+
   // constructor to initialise with sample data 
   GameState() {
     // load data from local storage or an external source eventually
     // ... for now, we'll initialise with some basic sample data
     _availableIngredients = [
       Ingredient(name: 'Tomato', imageUrl: 'assets/images/ingredients/tomato.png', dietaryTags: ['vegetarian'], calories: 20),
-      Ingredient(name: 'Lettuce', imageUrl: 'assets/images/ingredients/lettuce.png', dietaryTags: ['vegetarian', 'vegan'], calories: 10),
+      Ingredient(name: 'Cucumber', imageUrl: 'assets/images/ingredients/cucumber.png', dietaryTags: ['vegetarian', 'vegan'], calories: 15),
       // ... more ingredients here
     ];
     _currentGuests = [
-      Guest(name: 'Alice', iconUrl: 'assets/images/characters/cat-sprite.png', preferences: ['vegetarian'], dietaryRestrictions: ['gluten-free'], maxCalories: 500)
+      Guest(name: 'Alice', iconUrl: 'assets/images/characters/cat-sprite.png', preferences: ['vegetarian'], dietaryRestrictions: ['gluten-free'], maxCalories: 500),
+      Guest(name: 'Bob', iconUrl: 'assets/images/characters/chef-cat-1.png', preferences: ['vegan'], dietaryRestrictions: ['no-tomato'], maxCalories: 500),
       // ... more guests here
     ];
   }
@@ -44,6 +48,18 @@ class GameState with ChangeNotifier {
   // Simple feedback display (also in GameState)
   void _showFeedback(String message, BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));  
+  }
+
+  void pauseGame() {
+    _isPaused = true;
+    // Pause timers, animations, etc.
+    notifyListeners();
+  }
+
+  void resumeGame() {
+    _isPaused = false;
+    // Resume timers, animations, etc.
+    notifyListeners();
   }
 
   void submitDish(Dish dish, BuildContext context) {

@@ -33,6 +33,7 @@ class _PreparationAreaState extends State<PreparationArea> {
       padding: const EdgeInsets.all(20.0),
       child: Column(
         children: [
+          Image.asset('assets/images/environment/pot.png', height:200), // cooking pot centre
           Text('Preparation Area'),
           SizedBox(height: 15),
           Wrap( // Display selected ingredients
