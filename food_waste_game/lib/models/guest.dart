@@ -13,7 +13,21 @@ class Guest {
     required this.maxCalories,
   });
 
+  // bool isSatisfiedBy(Dish dish) {
+  //   return dish.doesSatisfyDietaryRestrictions(this); //&& dish.calculateCalorieScore(this) >= 50; // assuming a minimum calorie target
+  // }
+
   bool isSatisfiedBy(Dish dish) {
-    return dish.doesSatisfyDietaryRestrictions(this); //&& dish.calculateCalorieScore(this) >= 50; // assuming a minimum calorie target
+  if (!dish.doesSatisfyDietaryRestrictions(this)) return false; 
+
+  // Calorie score - refined
+  int calorieScore = dish.calculateCalorieScore(this); 
+  if (calorieScore < 50) return false; // minimum threshold
+
+  // Preference bonus
+  if (dish.satisfiesTags.contains(preferenceIcon)) {
+    calorieScore += 20; // bonus for matching preferences
   }
+  return true; 
+}
 }

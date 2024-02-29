@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:food_waste_game/models/guest.dart';
 import 'package:food_waste_game/screens/preparation_area.dart';
 import 'package:provider/provider.dart';
 import '../state/game_state.dart';

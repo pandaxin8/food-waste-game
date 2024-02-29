@@ -13,9 +13,23 @@ class PreparationArea extends StatefulWidget {
 class _PreparationAreaState extends State<PreparationArea> {
   List<Ingredient> _selectedIngredients = [];
 
+  void _handleIngredientDrop(Ingredient ingredient) {
+    setState(() {
+      _selectedIngredients.add(ingredient);
+    });
+  }
+
+  // Helper function to calculate the list of tags
+  List<String> calculateSatisfiesTags(List<Ingredient> ingredients) {
+    return ingredients.expand((ingredient) => ingredient.dietaryTags).toSet().toList();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return DragTarget<Ingredient>(
+      onAccept: _handleIngredientDrop,
+      builder: (context, candidateData, rejectedData) {
+        return Container(
       padding: const EdgeInsets.all(20.0),
       child: Column(
         children: [
@@ -42,9 +56,21 @@ class _PreparationAreaState extends State<PreparationArea> {
             builder: (context, gameState, child) {
               return ElevatedButton(
                 onPressed: () {
-                  // 1. Create 'Dish' object from _selectedIngredients
-                  // 2. Call a method like gameState.submitDish(dish)
-                  // 3. Potentially clear _selectedIngredients
+                  // 1. Create the Dish object
+                  Dish dish = Dish(
+                    name: 'Custom Dish',
+                    ingredients: _selectedIngredients,
+                    prepTime: 5, 
+                    satisfiesTags: calculateSatisfiesTags(_selectedIngredients), // Calculate the tags
+                  );
+
+                  // 2. Submit the dish to your game state
+                  gameState.submitDish(dish); 
+
+                  // 3. Clear the list of selected ingredients 
+                  setState(() {
+                    _selectedIngredients.clear(); 
+                  });
                 },
                 child: Text('Cook'), 
               );
@@ -52,6 +78,9 @@ class _PreparationAreaState extends State<PreparationArea> {
           ),
         ],
       ),
+    );
+
+      },
     );
   }
 }
