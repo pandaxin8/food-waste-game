@@ -12,21 +12,25 @@ class GuestProfileWidget extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
-          Image.network(guest.preferenceIcon, height: 40), // Display the preference icon 
+          //Image.asset('assets/images/characters/cat-sprite.png', height:40),
+          Image.asset(guest.iconUrl, height: 40), // Display the preference icon 
           SizedBox(width: 15),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(guest.name, style: TextStyle(fontWeight: FontWeight.bold)), 
-                Wrap( // Wrap the dietary restrictions in a row
-                  children: guest.dietaryRestrictions.map((restriction) => 
+                Text(guest.name, style: TextStyle(fontWeight: FontWeight.bold)),
+                //Text('Prefers: ${guest.preferenceIconUrl}'), // Example
+                Text('Prefers:'),
+                SizedBox(height: 8), // Additional space
+                Wrap(children: [
+                  // Display dietary restrictions ...
+                  for (String restriction in guest.dietaryRestrictions)
                     Padding(
                       padding: const EdgeInsets.only(right: 5.0),
                       child: Chip(label: Text(restriction)),
                     ),
-                  ).toList(),
-                ),
+                ]),
               ],
             ),
           ),

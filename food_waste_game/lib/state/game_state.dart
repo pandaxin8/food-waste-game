@@ -15,12 +15,12 @@ class GameState with ChangeNotifier {
     // load data from local storage or an external source eventually
     // ... for now, we'll initialise with some basic sample data
     _availableIngredients = [
-      Ingredient(name: 'Tomato', imageUrl: '...', dietaryTags: ['vegetarian'], calories: 20),
-      Ingredient(name: 'Lettuce', imageUrl: '...', dietaryTags: ['vegetarian', 'vegan'], calories: 10),
+      Ingredient(name: 'Tomato', imageUrl: 'assets/images/ingredients/tomato.png', dietaryTags: ['vegetarian'], calories: 20),
+      Ingredient(name: 'Lettuce', imageUrl: 'assets/images/ingredients/lettuce.png', dietaryTags: ['vegetarian', 'vegan'], calories: 10),
       // ... more ingredients here
     ];
     _currentGuests = [
-      Guest(name: 'Alice', preferenceIcon: '...', dietaryRestrictions: ['gluten-free'], maxCalories: 500)
+      Guest(name: 'Alice', iconUrl: 'assets/images/characters/cat-sprite.png', preferences: ['vegetarian'], dietaryRestrictions: ['gluten-free'], maxCalories: 500)
       // ... more guests here
     ];
   }
@@ -41,7 +41,12 @@ class GameState with ChangeNotifier {
     _loadLevel(_currentLevel); // Fetch level data
   }
 
-  void submitDish(Dish dish) {
+  // Simple feedback display (also in GameState)
+  void _showFeedback(String message, BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));  
+  }
+
+  void submitDish(Dish dish, BuildContext context) {
     // 1. check if the dish matches any current guest's needs
     // 2. calculate score impact (positive or negative)
     // 3. calculate waste amount
@@ -53,6 +58,13 @@ class GameState with ChangeNotifier {
         dishMatched = true;
         break; // assuming the dish is meant for a single guest
       }
+    }
+
+    // Feedback (inside GameState, assuming track if a dish was matched)
+    if (dishMatched) {
+      _showFeedback('Correct!', context); 
+    } else {
+      _showFeedback('Try Again!', context);
     }
 
     if (!dishMatched) {

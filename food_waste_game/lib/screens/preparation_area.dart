@@ -40,7 +40,8 @@ class _PreparationAreaState extends State<PreparationArea> {
               Container(
                 margin: const EdgeInsets.all(4.0),
                 child: Chip(
-                  avatar: Image.network(ingredient.imageUrl, height: 25),
+                  //avatar: Image.network(ingredient.imageUrl, height: 25),
+                  avatar: Image.asset(ingredient.imageUrl, height: 25),
                   label: Text(ingredient.name),
                   onDeleted: () {
                     setState(() {
@@ -65,7 +66,7 @@ class _PreparationAreaState extends State<PreparationArea> {
                   );
 
                   // 2. Submit the dish to your game state
-                  gameState.submitDish(dish); 
+                  gameState.submitDish(dish, context); 
 
                   // 3. Clear the list of selected ingredients 
                   setState(() {

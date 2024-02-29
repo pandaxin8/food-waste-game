@@ -12,7 +12,7 @@ void main() {
         Ingredient(name: 'Tomato', imageUrl: '...', dietaryTags: ['vegetarian'], calories: 20),
         Ingredient(name: 'Lettuce', imageUrl: '...', dietaryTags: ['vegetarian', 'vegan'], calories: 10)
       ]);
-      Guest guest1 = Guest(name: 'Alice', dietaryRestrictions: [], maxCalories: 500, preferenceIcon: "");
+      Guest guest1 = Guest(name: 'Alice', iconUrl: 'assets/images/characters/cat-sprite.png', preferences: [], dietaryRestrictions: [], maxCalories: 500);
 
       // Assert the expected outcome 
       expect(guest1.isSatisfiedBy(dish1), true); 
