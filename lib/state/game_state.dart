@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
+import 'package:food_waste_game/services/data_service.dart'; 
 import '../models/ingredient.dart';
 import '../models/guest.dart';
 import '../models/dish.dart';
@@ -9,22 +10,40 @@ class GameState with ChangeNotifier {
   int _currentLevel = 1;
   List<Ingredient> _availableIngredients = [];
   List<Guest> _currentGuests = [];
-
+  List<Dish> _availableDishes = [];
   bool _isPaused = false;
   bool get isPaused => _isPaused;
 
+  final DataService _dataService = DataService();
+
+  Future<void> _loadInitialData() async {
+    try {
+      _availableIngredients = await _dataService.getIngredients(); 
+      print('Ingredients fetched: $_availableIngredients');
+      // ... Potentially load guests here too: _currentGuests = await _dataService.getGuests();
+      _currentGuests = await _dataService.getGuests();
+      print('Guests fetched: $_currentGuests');
+      _availableDishes = await _dataService.getDishes();
+      print('Dishes fetched: $_availableDishes');
+      notifyListeners();
+    } catch (error) {
+      print('Error loading initial data: $error');
+    }
+  }
+
   // constructor to initialise with sample data 
   GameState() {
+    _loadInitialData(); 
     // load data from local storage or an external source eventually
     // ... for now, we'll initialise with some basic sample data
     _availableIngredients = [
-      Ingredient(name: 'Tomato', imageUrl: 'assets/images/ingredients/tomato.png', dietaryTags: ['vegetarian'], calories: 20),
-      Ingredient(name: 'Cucumber', imageUrl: 'assets/images/ingredients/cucumber.png', dietaryTags: ['vegetarian', 'vegan'], calories: 15),
+      //Ingredient(name: 'Tomato', imageUrl: 'assets/images/ingredients/tomato.png', dietaryTags: ['vegetarian'], calories: 20),
+      //Ingredient(name: 'Cucumber', imageUrl: 'assets/images/ingredients/cucumber.png', dietaryTags: ['vegetarian', 'vegan'], calories: 15),
       // ... more ingredients here
     ];
     _currentGuests = [
-      Guest(name: 'Alice', iconUrl: 'assets/images/characters/cat-sprite.png', preferences: ['vegetarian'], dietaryRestrictions: ['gluten-free'], maxCalories: 500),
-      Guest(name: 'Bob', iconUrl: 'assets/images/characters/chef-cat-1.png', preferences: ['vegan'], dietaryRestrictions: ['no-tomato'], maxCalories: 500),
+      //Guest(name: 'Alice', iconUrl: 'assets/images/characters/cat-sprite.png', preferences: ['vegetarian'], dietaryRestrictions: ['gluten-free'], maxCalories: 500),
+      //Guest(name: 'Bob', iconUrl: 'assets/images/characters/chef-cat-1.png', preferences: ['vegan'], dietaryRestrictions: ['no-tomato'], maxCalories: 500),
       // ... more guests here
     ];
   }

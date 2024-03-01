@@ -30,7 +30,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  provider: ^5.0.0
+  provider: ^6.1.2
+  firebase_core: ^2.25.5
+  cloud_firestore: ^4.3.0
+
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -67,8 +70,15 @@ flutter:
     - assets/images/ingredients/tomato.png
     - assets/images/ingredients/lettuce.png
     - assets/images/ingredients/cucumber.png
-    - assets/images/characters/cat-sprite.png
-    - assets/images/characters/chef-cat-1.png
+    - assets/images/ingredients/cashews.png
+    - assets/images/ingredients/quinoa.png
+    - assets/images/ingredients/salmon.png
+    - assets/images/ingredients/spinach.png
+    - assets/images/avatars/cat-sprite.png
+    - assets/images/avatars/chef-cat-1.png
+    - assets/images/avatars/otter.png
+    - assets/images/avatars/panda.png
+    - assets/images/avatars/koala.png
     - assets/images/backgrounds/main-menu.png
     - assets/images/environment/pot.png
 

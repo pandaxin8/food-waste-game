@@ -1,3 +1,16 @@
+// This block is necessary for configuring buildscript dependencies
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // This is the correct place for the classpath
+        // classpath 'com.android.tools.build:gradle:X.X.X' // Make sure this is current Android Gradle Plugin version
+        classpath 'com.google.gms:google-services:4.4.1'
+    }
+}
+
 allprojects {
     repositories {
         google()

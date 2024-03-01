@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:food_waste_game/models/dish.dart';
 
 class Guest {
@@ -15,6 +16,16 @@ class Guest {
     required this.dietaryRestrictions,
     required this.maxCalories,
   });
+
+  factory Guest.fromDocument(DocumentSnapshot doc) {
+    return Guest(
+      name: doc.get('name') as String, // Access the 'name' field
+      iconUrl: doc.get('iconUrl') as String, 
+      preferences: List<String>.from(doc.get('preferences')), // Cast preferences as List<String>
+      dietaryRestrictions: List<String>.from(doc.get('dietaryRestrictions')),
+      maxCalories: doc.get('maxCalories') as int,
+    );
+  }
 
   // bool isSatisfiedBy(Dish dish) {
   //   return dish.doesSatisfyDietaryRestrictions(this); //&& dish.calculateCalorieScore(this) >= 50; // assuming a minimum calorie target

@@ -1,0 +1,14 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // All users can read the entire database
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    // // Only admin users can write to the database
+    // match /{document=**} {
+    //   allow write: if request.auth.token.isAdmin == true;
+    // }
+  }
+}
+

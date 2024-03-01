@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Ingredient {
   final String name;
   final String imageUrl; // to display the Ingredient
@@ -11,4 +13,13 @@ class Ingredient {
     required this.dietaryTags,
     required this.calories,
   });
+
+  factory Ingredient.fromDocument(DocumentSnapshot doc) {
+    return Ingredient(
+      name: doc.get('name') as String,
+      imageUrl: doc.get('imageUrl') as String,
+      dietaryTags: List<String>.from(doc.get('dietaryTags')),
+      calories: doc.get('calories') as int,
+    );
+  }
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "740392261000",
+    "project_id": "food-waste-game",
+    "storage_bucket": "food-waste-game.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:740392261000:android:dbeeaeb31e68e89fe3163d",
+        "android_client_info": {
+          "package_name": "com.example.food_waste_game"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsYN0TUyzaVHHDv29G1TwbSFI35OAiBXo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
