@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:food_waste_game/main.dart';
+import 'package:food_waste_game/models/dish.dart';
 import 'package:food_waste_game/screens/preparation_area.dart';
 import 'package:provider/provider.dart';
 import '../state/game_state.dart';
@@ -9,6 +10,29 @@ import '../widgets/waste_meter.dart';
 
 
 class GameScreen extends StatelessWidget {
+  void _showAvailableDishes(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        // You could use Consumer<GameState> here if your available dishes are part of your game state.
+        return Consumer<GameState>(
+          builder: (context, gameState, child) {
+            return ListView.builder(
+              itemCount: gameState.availableDishes.length,
+              itemBuilder: (context, index) {
+                Dish dish = gameState.availableDishes[index];
+                return ListTile(
+                  title: Text(dish.name),
+                  // Add more info about the dish here if necessary
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,6 +49,12 @@ class GameScreen extends StatelessWidget {
         },
       ),
         actions: [
+          IconButton(
+            icon: Icon(Icons.menu_book), // A book-like icon can represent recipes/dishes
+            onPressed: () {
+              _showAvailableDishes(context);
+            },
+          ),
           Consumer<GameState>(
             builder: (context, gameState, child) {
               return IconButton(

@@ -19,9 +19,18 @@ class _PreparationAreaState extends State<PreparationArea> {
     });
   }
 
+
   // Helper function to calculate the list of tags
   List<String> calculateSatisfiesTags(List<Ingredient> ingredients) {
     return ingredients.expand((ingredient) => ingredient.dietaryTags).toSet().toList();
+  }
+
+  // Function to determine which dishes can be made from selected ingredients
+  List<Dish> getPossibleDishes() {
+    // This will be a placeholder function that checks selected ingredients
+    // against available dishes to determine which dishes can be made
+    // For now, let's assume it just returns all available dishes
+    return Provider.of<GameState>(context, listen: false).availableDishes;
   }
 
   @override
@@ -33,6 +42,22 @@ class _PreparationAreaState extends State<PreparationArea> {
       padding: const EdgeInsets.all(20.0),
       child: Column(
         children: [
+        //   Text('Possible Dishes:'),
+        // Wrap(
+        //   children: getPossibleDishes().map((dish) => 
+        //     InkWell(
+        //       onTap: () {
+        //         // handle tap: when tapped, it could fill the preparation area with the ingredients for this dish
+        //       },
+        //       child: Chip(
+        //         label: Text(dish.name),
+        //         onDeleted: () {
+        //           // handle deletion
+        //         },
+        //       ),
+        //     ),
+        //   ).toList(),
+        // ),
           Image.asset('assets/images/environment/pot.png', height:200), // cooking pot centre
           Text('Preparation Area'),
           SizedBox(height: 15),
@@ -59,15 +84,15 @@ class _PreparationAreaState extends State<PreparationArea> {
               return ElevatedButton(
                 onPressed: () {
                   // 1. Create the Dish object
-                  Dish dish = Dish(
-                    name: 'Custom Dish',
-                    ingredients: _selectedIngredients,
-                    prepTime: 5, 
-                    satisfiesTags: calculateSatisfiesTags(_selectedIngredients), // Calculate the tags
-                  );
+                  // Dish dish = Dish(
+                  //   name: 'Custom Dish',
+                  //   ingredients: _selectedIngredients,
+                  //   prepTime: 5, 
+                  //   satisfiesTags: calculateSatisfiesTags(_selectedIngredients), // Calculate the tags
+                  // );
 
                   // 2. Submit the dish to your game state
-                  gameState.submitDish(dish, context); 
+                  gameState.submitDish(_selectedIngredients, context); 
 
                   // 3. Clear the list of selected ingredients 
                   setState(() {

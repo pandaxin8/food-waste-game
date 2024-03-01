@@ -33,23 +33,29 @@ class Guest {
 
   bool isSatisfiedBy(Dish dish) {
     // First check if the dish satisfies the dietary restrictions
+    print('isSatisfiedByMethod:');
+    print('dish name: $dish');
     if (!dish.doesSatisfyDietaryRestrictions(this)) return false; 
 
     // Check the calorie score
-    int calorieScore = dish.calculateCalorieScore(this); 
-    if (calorieScore < 50) return false; // Ensure there's a minimum calorie score
+    // int calorieScore = dish.calculateCalorieScore(this); 
+    // if (calorieScore <= 10) return false; // Ensure there's a minimum calorie score
+    // print('hello 3');
 
     // Check if any of the guest's preferences match the dish's satisfiesTags
     bool hasPreferenceMatch = preferences.any((preference) => 
       dish.satisfiesTags.contains(preference));
 
+    print('hasPreferenceMatch:' + hasPreferenceMatch.toString());
+
     // Apply a preference bonus if there's a match
-    if (hasPreferenceMatch) {
-      calorieScore += 20; // Bonus for matching preferences
-    }
+    // if (hasPreferenceMatch) {
+    //   calorieScore += 20; // Bonus for matching preferences
+    // }
 
     // If you have a calorie limit, you might want to check if the calorieScore is less than maxCalories
-    if (calorieScore > maxCalories) return false; // Ensure calorie score is within the limit
+    // if (calorieScore > maxCalories) return false; // Ensure calorie score is within the limit
+    // print('hello 4');
 
     return true; // The dish satisfies the guest if all conditions are met
   }

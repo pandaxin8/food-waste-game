@@ -22,7 +22,16 @@ class GuestProfileWidget extends StatelessWidget {
                 Text(guest.name, style: TextStyle(fontWeight: FontWeight.bold)),
                 //Text('Prefers: ${guest.preferenceIconUrl}'), // Example
                 Text('Prefers:'),
+                Wrap(children: [
+                  // Display preferences: ...
+                  for (String preference in guest.preferences)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 5.0),
+                      child: Chip(label: Text(preference)),
+                    ),
+                ]),
                 SizedBox(height: 8), // Additional space
+                Text('Dietary Restrictions:'),
                 Wrap(children: [
                   // Display dietary restrictions ...
                   for (String restriction in guest.dietaryRestrictions)

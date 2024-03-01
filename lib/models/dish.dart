@@ -31,23 +31,32 @@ class Dish {
   }
 
   static Future<List<Ingredient>> _getIngredientsFromReferences(List<dynamic> refs) async {
-  List<Ingredient> ingredients = [];
-  for (var ref in refs) {
-    if (ref is DocumentReference) {
-      DocumentSnapshot<Object?> ingredientDoc = await ref.get();
-      ingredients.add(Ingredient.fromDocument(ingredientDoc));
-    } else {
-      // Handle the case where the data is not a DocumentReference
-      throw Exception('Expected a DocumentReference, but got a different type');
+    List<Ingredient> ingredients = [];
+    for (var ref in refs) {
+      if (ref is DocumentReference) {
+        DocumentSnapshot<Object?> ingredientDoc = await ref.get();
+        ingredients.add(Ingredient.fromDocument(ingredientDoc));
+      } else {
+        // Handle the case where the data is not a DocumentReference
+        throw Exception('Expected a DocumentReference, but got a different type');
+      }
     }
+    return ingredients;
   }
-  return ingredients;
-}
+
+  // Check if the selected ingredients form a valid dish.
+  static bool canFormDish(List<Ingredient> selectedIngredients) {
+    // TODO: fetch recipes (if not already loaded) 
+    // and compare selected ingredients against recipe to see if there's a match
+    // Placeholder logic for checking if we have a valid dish.
+    // This should be replaced with the actual game logic for defining a dish.
+    return selectedIngredients.isNotEmpty; // Simplified check for MVP.
+  }
 
 
   bool doesSatisfyDietaryRestrictions(Guest guest) {
-    return ingredients.every((ingredient) => 
-    ingredient.dietaryTags.every((tag) => !guest.dietaryRestrictions.contains(tag))
+    return ingredients.every((ingredient) =>
+    !ingredient.dietaryTags.any((tag) => guest.dietaryRestrictions.contains(tag))
   );
   }
 
