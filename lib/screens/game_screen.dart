@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:food_waste_game/main.dart';
 import 'package:food_waste_game/models/dish.dart';
@@ -9,21 +10,56 @@ import '../widgets/ingredient_widget.dart';
 import '../widgets/waste_meter.dart';
 
 
+
+
 class GameScreen extends StatelessWidget {
+  // Method to simulate completing a level and updating the player level
+  void _simulateLevelCompletion(BuildContext context) {
+    final gameState = Provider.of<GameState>(context, listen: false);
+    // Simulate achieving a new score (example: 150 points)
+    gameState.loadCurrentPlayerData();
+    gameState.updatePlayerLevelAndCheckUnlocks(150, context).then((_) {
+      // After updating, you might want to refresh certain parts of your UI or show a confirmation message
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Level completed! Checking for new recipes...')));
+    });
+  }
+
+
   void _showAvailableDishes(BuildContext context) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        // You could use Consumer<GameState> here if your available dishes are part of your game state.
         return Consumer<GameState>(
           builder: (context, gameState, child) {
+            List<Dish> dishesToShow; // Use List<Dish> to hold Dish objects
+
+            if (gameState.currentPlayer == null) {
+              // For non-signed-in users, show Level 1 dishes
+              dishesToShow = gameState.dishesForLevel(1); // Assuming this method filters _availableDishes by level
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Sign in to unlock more dishes!")));
+                }
+              });
+            } else {
+              // For signed-in users, show unlocked dishes
+              // Map the unlocked dish names back to Dish objects
+              dishesToShow = gameState.currentPlayer!.unlockedDishes
+                  .map((name) => gameState.availableDishes.firstWhere((dish) => dish.name == name))
+                  .toList();
+
+              if (dishesToShow.length == 0) {
+                gameState.checkForUnlockedRecipes(gameState.currentPlayer!, context);
+              }
+            }
+
+            // Display the dishes
             return ListView.builder(
-              itemCount: gameState.availableDishes.length,
+              itemCount: dishesToShow.length,
               itemBuilder: (context, index) {
-                Dish dish = gameState.availableDishes[index];
+                Dish dish = dishesToShow[index];
                 return ListTile(
                   title: Text(dish.name),
-                  // Add more info about the dish here if necessary
                 );
               },
             );
@@ -32,6 +68,7 @@ class GameScreen extends StatelessWidget {
       },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +86,10 @@ class GameScreen extends StatelessWidget {
         },
       ),
         actions: [
+          IconButton(
+            icon: Icon(Icons.star), // Example icon for simulating level completion
+            onPressed: () => _simulateLevelCompletion(context),
+          ),
           IconButton(
             icon: Icon(Icons.menu_book), // A book-like icon can represent recipes/dishes
             onPressed: () {
@@ -95,28 +136,6 @@ class GameScreen extends StatelessWidget {
         builder: (context, gameState, child) {
           return Column(
             children: [
-              // Expanded(
-              //   flex: 2,
-              //   child: ShaderMask(
-              //     shaderCallback: (Rect bounds) {
-              //       return LinearGradient(
-              //         begin: Alignment.topCenter,
-              //         end: Alignment.bottomCenter,
-              //         colors: [Colors.white, Colors.transparent, Colors.transparent, Colors.white],
-              //         stops: [0.0, 0.1, 0.9, 1.0],
-              //       ).createShader(bounds);
-              //     },
-              //     blendMode: BlendMode.dstOut,
-              //     child: 
-                  // Scrollbar(
-                   // isAlwaysShown: true,
-                    // child: ListView.builder(
-                    //   itemCount: gameState.currentGuests.length,
-                    //   itemBuilder: (context, index) => GuestProfileWidget(guest: gameState.currentGuests[index]),
-                    // ),
-                  // ),
-                // ),
-              // ),
               Expanded(
                 flex: 3,
                 child: Wrap(

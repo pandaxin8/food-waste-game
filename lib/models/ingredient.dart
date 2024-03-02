@@ -22,4 +22,14 @@ class Ingredient {
       calories: doc.get('calories') as int,
     );
   }
+
+  // convert Ingredientto Map, for storing in Firestore
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'imageUrl': imageUrl,
+      'dietaryTags': dietaryTags,
+      'calroies': calories,
+    };
+  }
 }

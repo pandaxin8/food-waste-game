@@ -5,6 +5,7 @@ import '../models/dish.dart';
 import '../state/game_state.dart';
 
 
+
 class PreparationArea extends StatefulWidget {
   @override
   _PreparationAreaState createState() => _PreparationAreaState();
@@ -58,6 +59,7 @@ class _PreparationAreaState extends State<PreparationArea> {
         //     ),
         //   ).toList(),
         // ),
+
           Image.asset('assets/images/environment/pot.png', height:200), // cooking pot centre
           Text('Preparation Area'),
           SizedBox(height: 15),

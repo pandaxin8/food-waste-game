@@ -25,6 +25,7 @@ class MainMenuScreen extends StatelessWidget {
                   // Handle New Game action
                   Provider.of<GameState>(context, listen: false).startNewGame(); 
                   Navigator.pushReplacementNamed(context, AppRoutes.gameScreen);
+                  Provider.of<GameState>(context, listen: false).loadCurrentPlayerData();
                 },
                 child: Text('New Game'),
               ),

@@ -7,12 +7,14 @@ class Dish {
   final List<Ingredient> ingredients;
   final int prepTime;
   final List<String> satisfiesTags;
+  final int unlockLevel; // new field to determine when dish gets unlocked
 
   Dish({
     required this.name,
     required this.ingredients, 
     required this.prepTime,
     required this.satisfiesTags,
+    required this.unlockLevel,
   });
 
   static Future<Dish> fromDocument(DocumentSnapshot doc) async {
@@ -27,6 +29,7 @@ class Dish {
       prepTime: doc.get('prepTime') as int,
       satisfiesTags: List<String>.from(doc.get('satisfiesTags')),
       ingredients: ingredients, // Pass the List<Ingredient> here
+      unlockLevel: doc.get('unlockLevel') as int,
     );
   }
 
@@ -44,15 +47,6 @@ class Dish {
     return ingredients;
   }
 
-  // Check if the selected ingredients form a valid dish.
-  static bool canFormDish(List<Ingredient> selectedIngredients) {
-    // TODO: fetch recipes (if not already loaded) 
-    // and compare selected ingredients against recipe to see if there's a match
-    // Placeholder logic for checking if we have a valid dish.
-    // This should be replaced with the actual game logic for defining a dish.
-    return selectedIngredients.isNotEmpty; // Simplified check for MVP.
-  }
-
 
   bool doesSatisfyDietaryRestrictions(Guest guest) {
     return ingredients.every((ingredient) =>
@@ -65,5 +59,16 @@ class Dish {
     int totalCalories = ingredients.fold(0, (sum, ingredient) => sum + ingredient.calories);
     int differenceFromLimit = (guest.maxCalories - totalCalories).abs(); 
     return 100 - differenceFromLimit; // scale the result if needed
+  }
+
+  // convert Dish to Map, for storing in Firestore
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'ingredients': ingredients.map((i) => i.toMap()).toList(),
+      'prepTime': prepTime,
+      'satisfiesTags': satisfiesTags,
+      'unlockLevel': unlockLevel,
+    };
   }
 }
