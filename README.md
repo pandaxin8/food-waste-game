@@ -17,7 +17,7 @@ Features
 To install and run the Food Waste Awareness Game, follow these steps:
 1. Ensure you have Flutter installed on your machine. If not, follow the installation guide on the Flutter official website.
 - For Windows:
-  - Download the Flutter SDK from the official Flutter website.
+  - Download the Flutter SDK from [the official Flutter website](https://docs.flutter.dev/get-started/install).
   - Extract the downloaded ZIP file to a location on your computer (e.g., C:\flutter).
   - Add the Flutter bin directory to your system PATH:
     - Search for "Environment Variables" in the Windows search bar and open it.
