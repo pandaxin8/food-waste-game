@@ -1,6 +1,4 @@
-# food_waste_game
-
-## Green Paw Chefs: A Food Waste Awareness Game
+# Green Paw Chefs: A Food Waste Awareness Game
 
 This game is designed to educate and raise awareness about the importance of reducing food waste. Built with Flutter, it challenges players to manage a virtual restaurant, where they must carefully select ingredients, prepare dishes that cater to the diverse preferences of guests, and minimize waste. The game progresses through increasingly challenging levels, introducing various dietary restrictions, calorie-conscious meal planning, and an ingredient inventory management system.
 
