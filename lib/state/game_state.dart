@@ -383,5 +383,6 @@ Future<void> updatePlayerLevelAndCheckUnlocks(int newScore, BuildContext context
   }
 
 
+
   // ... more methods as game mechanics evolve (e.g. ending level, changing ingredients based on dish usage, etc.)
 }

@@ -81,6 +81,10 @@ flutter:
     - assets/images/avatars/panda.png
     - assets/images/avatars/koala.png
     - assets/images/backgrounds/main-menu.png
+    - assets/images/backgrounds/sign-in.png
+    - assets/images/backgrounds/ingredient-shelves.png
+    - assets/images/backgrounds/preparation-area.png
+    - assets/images/backgrounds/game-background.png
     - assets/images/environment/pot.png
 
   # An image asset can refer to one or more resolution-specific "variants", see

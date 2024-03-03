@@ -69,13 +69,12 @@ class GameScreen extends StatelessWidget {
     );
   }
 
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Game Screen'), 
-        leading: Builder( // Use a Builder to provide a context within the Scaffold
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: Text('Game Screen'), 
+      leading: Builder( // Use a Builder to provide a context within the Scaffold
         builder: (BuildContext context) {
           return IconButton(
             icon: Icon(Icons.person), // TODO: replace with guest-related icon
@@ -85,54 +84,61 @@ class GameScreen extends StatelessWidget {
           );
         },
       ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.star), // Example icon for simulating level completion
-            onPressed: () => _simulateLevelCompletion(context),
+      actions: [
+        IconButton(
+          icon: Icon(Icons.star), // Example icon for simulating level completion
+          onPressed: () => _simulateLevelCompletion(context),
+        ),
+        IconButton(
+          icon: Icon(Icons.menu_book), // A book-like icon can represent recipes/dishes
+          onPressed: () {
+            _showAvailableDishes(context);
+          },
+        ),
+        Consumer<GameState>(
+          builder: (context, gameState, child) {
+            return IconButton(
+              icon: Icon(gameState.isPaused ? Icons.play_arrow : Icons.pause),
+              onPressed: () {
+                // Toggle game pause state
+                if (gameState.isPaused) {
+                  gameState.resumeGame();
+                } else {
+                  gameState.pauseGame();
+                }
+              },
+            );
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.home),
+          onPressed: () {
+            // Optionally pause the game before leaving the screen
+            Provider.of<GameState>(context, listen: false).pauseGame();
+            // Return to main menu
+            Navigator.pushReplacementNamed(context, AppRoutes.mainMenu);
+          },
+        ),
+      ],
+    ),
+    drawer: Consumer<GameState>(
+      builder: (context, gameState, child) {
+        return Drawer(
+          child: ListView.builder(
+            itemCount: gameState.currentGuests.length,
+            itemBuilder: (context, index) => GuestProfileWidget(guest: gameState.currentGuests[index]),
           ),
-          IconButton(
-            icon: Icon(Icons.menu_book), // A book-like icon can represent recipes/dishes
-            onPressed: () {
-              _showAvailableDishes(context);
-            },
-          ),
-          Consumer<GameState>(
-            builder: (context, gameState, child) {
-              return IconButton(
-                icon: Icon(gameState.isPaused ? Icons.play_arrow : Icons.pause),
-                onPressed: () {
-                  // Toggle game pause state
-                  if (gameState.isPaused) {
-                    gameState.resumeGame();
-                  } else {
-                    gameState.pauseGame();
-                  }
-                },
-              );
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.home),
-            onPressed: () {
-              // Optionally pause the game before leaving the screen
-              Provider.of<GameState>(context, listen: false).pauseGame();
-              // Return to main menu
-              Navigator.pushReplacementNamed(context, AppRoutes.mainMenu);
-            },
-          ),
-        ],
+        );
+      },
+    ),
+    body: Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('/images/backgrounds/game-background.png'),
+          fit: BoxFit.cover,
+        ),
       ),
-      drawer: Consumer<GameState>(
-        builder: (context, gameState, child) {
-          return Drawer(
-            child: ListView.builder(
-              itemCount: gameState.currentGuests.length,
-              itemBuilder: (context, index) => GuestProfileWidget(guest: gameState.currentGuests[index]),
-            ),
-          );
-        },
-      ),
-      body: Consumer<GameState>(
+      child: Consumer<GameState>(
         builder: (context, gameState, child) {
           return Column(
             children: [
@@ -148,6 +154,89 @@ class GameScreen extends StatelessWidget {
           );
         },
       ),
-    );
-  }
+    ),
+  );
+}
+
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Game Screen'), 
+//         leading: Builder( // Use a Builder to provide a context within the Scaffold
+//         builder: (BuildContext context) {
+//           return IconButton(
+//             icon: Icon(Icons.person), // TODO: replace with guest-related icon
+//             onPressed: () {
+//               Scaffold.of(context).openDrawer();
+//             },
+//           );
+//         },
+//       ),
+//         actions: [
+//           IconButton(
+//             icon: Icon(Icons.star), // Example icon for simulating level completion
+//             onPressed: () => _simulateLevelCompletion(context),
+//           ),
+//           IconButton(
+//             icon: Icon(Icons.menu_book), // A book-like icon can represent recipes/dishes
+//             onPressed: () {
+//               _showAvailableDishes(context);
+//             },
+//           ),
+//           Consumer<GameState>(
+//             builder: (context, gameState, child) {
+//               return IconButton(
+//                 icon: Icon(gameState.isPaused ? Icons.play_arrow : Icons.pause),
+//                 onPressed: () {
+//                   // Toggle game pause state
+//                   if (gameState.isPaused) {
+//                     gameState.resumeGame();
+//                   } else {
+//                     gameState.pauseGame();
+//                   }
+//                 },
+//               );
+//             },
+//           ),
+//           IconButton(
+//             icon: Icon(Icons.home),
+//             onPressed: () {
+//               // Optionally pause the game before leaving the screen
+//               Provider.of<GameState>(context, listen: false).pauseGame();
+//               // Return to main menu
+//               Navigator.pushReplacementNamed(context, AppRoutes.mainMenu);
+//             },
+//           ),
+//         ],
+//       ),
+//       drawer: Consumer<GameState>(
+//         builder: (context, gameState, child) {
+//           return Drawer(
+//             child: ListView.builder(
+//               itemCount: gameState.currentGuests.length,
+//               itemBuilder: (context, index) => GuestProfileWidget(guest: gameState.currentGuests[index]),
+//             ),
+//           );
+//         },
+//       ),
+//       body: Consumer<GameState>(
+//         builder: (context, gameState, child) {
+//           return Column(
+//             children: [
+//               Expanded(
+//                 flex: 3,
+//                 child: Wrap(
+//                   children: gameState.availableIngredients.map((ingredient) => IngredientWidget(ingredient)).toList(),
+//                 ),
+//               ),
+//               PreparationArea(),
+//               WasteMeter(wasteLevel: gameState.wasteAmount),
+//             ],
+//           );
+//         },
+//       ),
+//     );
+//   }
 }

@@ -12,20 +12,31 @@ class WasteMeter extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey),
       ),
-      child: Row(
+      child: Stack(
         children: [
-          Expanded(
-            flex: wasteLevel, // Flexible, so the bar fills as waste increases
-            child: Container(
-              color: Colors.red, // Color for indicating waste
-            ),
+          Container(
+            height: double.infinity,
+            width: double.infinity,
+            color: const Color.fromARGB(255, 123, 170, 125), // Default color for the whole meter
           ),
-          Expanded(
-            flex: 100 - wasteLevel, // Remaining space represents 'good'
-            child: Container(
-              color: Colors.green,
-            ),
-          )
+          Container(
+            height: double.infinity,
+            width: MediaQuery.of(context).size.width * (wasteLevel / 100), // Adjusted width based on waste level
+            color: Colors.red, // Color for indicating waste
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Icon(Icons.eco, color: Color.fromARGB(216, 20, 236, 189)), // Leaf icon for low waste
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Icon(Icons.delete, color: const Color.fromARGB(255, 235, 112, 103)), // Trash bin icon for high waste
+              ),
+            ],
+          ),
         ],
       ),
     );

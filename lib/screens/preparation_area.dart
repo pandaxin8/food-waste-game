@@ -34,34 +34,33 @@ class _PreparationAreaState extends State<PreparationArea> {
     return Provider.of<GameState>(context, listen: false).availableDishes;
   }
 
+
   @override
   Widget build(BuildContext context) {
     return DragTarget<Ingredient>(
       onAccept: _handleIngredientDrop,
       builder: (context, candidateData, rejectedData) {
         return Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('/images/backgrounds/preparation-area.png'), // replace with your actual preparation area background asset path
+              fit: BoxFit.cover,
+            ),
+            borderRadius: BorderRadius.circular(20.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.9), // Adjust opacity for desired shadow intensity
+                spreadRadius: 3, // Control how far the shadow spreads
+                blurRadius: 5,  // Controls the blurriness of the shadow
+              offset: Offset(0, 3), // Offset for directional shadow
+            ),
+          ],
+          ),
       padding: const EdgeInsets.all(20.0),
       child: Column(
         children: [
-        //   Text('Possible Dishes:'),
-        // Wrap(
-        //   children: getPossibleDishes().map((dish) => 
-        //     InkWell(
-        //       onTap: () {
-        //         // handle tap: when tapped, it could fill the preparation area with the ingredients for this dish
-        //       },
-        //       child: Chip(
-        //         label: Text(dish.name),
-        //         onDeleted: () {
-        //           // handle deletion
-        //         },
-        //       ),
-        //     ),
-        //   ).toList(),
-        // ),
-
           Image.asset('assets/images/environment/pot.png', height:200), // cooking pot centre
-          Text('Preparation Area'),
+          // Text('Preparation Area'),
           SizedBox(height: 15),
           Wrap( // Display selected ingredients
             children: _selectedIngredients.map((ingredient) => 
@@ -101,7 +100,11 @@ class _PreparationAreaState extends State<PreparationArea> {
                     _selectedIngredients.clear(); 
                   });
                 },
-                child: Text('Cook'), 
+                child: Text('Cook'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF8B4513), // Woody brown color
+                  foregroundColor: Colors.white,
+                ), 
               );
             },
           ),
