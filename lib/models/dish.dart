@@ -8,6 +8,7 @@ class Dish {
   final int prepTime;
   final List<String> satisfiesTags;
   final int unlockLevel; // new field to determine when dish gets unlocked
+  final String imagePath;
 
   Dish({
     required this.name,
@@ -15,6 +16,7 @@ class Dish {
     required this.prepTime,
     required this.satisfiesTags,
     required this.unlockLevel,
+    required this.imagePath,
   });
 
   static Future<Dish> fromDocument(DocumentSnapshot doc) async {
@@ -30,6 +32,7 @@ class Dish {
       satisfiesTags: List<String>.from(doc.get('satisfiesTags')),
       ingredients: ingredients, // Pass the List<Ingredient> here
       unlockLevel: doc.get('unlockLevel') as int,
+      imagePath: doc.get('imagePath') as String,
     );
   }
 
@@ -69,6 +72,7 @@ class Dish {
       'prepTime': prepTime,
       'satisfiesTags': satisfiesTags,
       'unlockLevel': unlockLevel,
+      'imagePath' : imagePath,
     };
   }
 }

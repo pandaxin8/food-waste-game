@@ -48,23 +48,54 @@ class GameScreen extends StatelessWidget {
                   .map((name) => gameState.availableDishes.firstWhere((dish) => dish.name == name))
                   .toList();
 
-              if (dishesToShow.length == 0) {
+              if (dishesToShow.isEmpty) {
                 gameState.checkForUnlockedRecipes(gameState.currentPlayer!, context);
               }
             }
 
             // Display the dishes
-            return ListView.builder(
-              itemCount: dishesToShow.length,
-              itemBuilder: (context, index) {
-                Dish dish = dishesToShow[index];
-                return ListTile(
-                  title: Text(dish.name),
-                );
-              },
-            );
-          },
-        );
+            // return ListView.builder(
+            //   itemCount: dishesToShow.length,
+            //   itemBuilder: (context, index) {
+            //     Dish dish = dishesToShow[index];
+            //     return ListTile(
+            //       title: Text(dish.name),
+            //     );
+            //   },
+            // );
+            // Use GridView for a more engaging layout
+          return GridView.builder(
+            padding: EdgeInsets.all(8),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+            ),
+            itemCount: dishesToShow.length,
+            itemBuilder: (context, index) {
+              Dish dish = dishesToShow[index];
+              return Card(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Image(
+                        image: AssetImage(dish.imagePath), // Use AssetImage for the image provider
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Text(dish.name, style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    // You can add more details such as prep time or tags here
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      );
       },
     );
   }
@@ -77,7 +108,7 @@ Widget build(BuildContext context) {
       leading: Builder( // Use a Builder to provide a context within the Scaffold
         builder: (BuildContext context) {
           return IconButton(
-            icon: Icon(Icons.person), // TODO: replace with guest-related icon
+            icon: Icon(Icons.person),
             onPressed: () {
               Scaffold.of(context).openDrawer();
             },
@@ -158,85 +189,4 @@ Widget build(BuildContext context) {
   );
 }
 
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Game Screen'), 
-//         leading: Builder( // Use a Builder to provide a context within the Scaffold
-//         builder: (BuildContext context) {
-//           return IconButton(
-//             icon: Icon(Icons.person), // TODO: replace with guest-related icon
-//             onPressed: () {
-//               Scaffold.of(context).openDrawer();
-//             },
-//           );
-//         },
-//       ),
-//         actions: [
-//           IconButton(
-//             icon: Icon(Icons.star), // Example icon for simulating level completion
-//             onPressed: () => _simulateLevelCompletion(context),
-//           ),
-//           IconButton(
-//             icon: Icon(Icons.menu_book), // A book-like icon can represent recipes/dishes
-//             onPressed: () {
-//               _showAvailableDishes(context);
-//             },
-//           ),
-//           Consumer<GameState>(
-//             builder: (context, gameState, child) {
-//               return IconButton(
-//                 icon: Icon(gameState.isPaused ? Icons.play_arrow : Icons.pause),
-//                 onPressed: () {
-//                   // Toggle game pause state
-//                   if (gameState.isPaused) {
-//                     gameState.resumeGame();
-//                   } else {
-//                     gameState.pauseGame();
-//                   }
-//                 },
-//               );
-//             },
-//           ),
-//           IconButton(
-//             icon: Icon(Icons.home),
-//             onPressed: () {
-//               // Optionally pause the game before leaving the screen
-//               Provider.of<GameState>(context, listen: false).pauseGame();
-//               // Return to main menu
-//               Navigator.pushReplacementNamed(context, AppRoutes.mainMenu);
-//             },
-//           ),
-//         ],
-//       ),
-//       drawer: Consumer<GameState>(
-//         builder: (context, gameState, child) {
-//           return Drawer(
-//             child: ListView.builder(
-//               itemCount: gameState.currentGuests.length,
-//               itemBuilder: (context, index) => GuestProfileWidget(guest: gameState.currentGuests[index]),
-//             ),
-//           );
-//         },
-//       ),
-//       body: Consumer<GameState>(
-//         builder: (context, gameState, child) {
-//           return Column(
-//             children: [
-//               Expanded(
-//                 flex: 3,
-//                 child: Wrap(
-//                   children: gameState.availableIngredients.map((ingredient) => IngredientWidget(ingredient)).toList(),
-//                 ),
-//               ),
-//               PreparationArea(),
-//               WasteMeter(wasteLevel: gameState.wasteAmount),
-//             ],
-//           );
-//         },
-//       ),
-//     );
-//   }
 }

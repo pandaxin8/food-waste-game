@@ -104,6 +104,7 @@ class GameState with ChangeNotifier {
         prepTime: 10, // Placeholder value for prepTime.
         satisfiesTags: calculateSatisfiesTags(selectedIngredients),
         unlockLevel: 1,
+        imagePath: '',
       );
 
       // Check if the created dish satisfies the current guest's preferences.
@@ -155,7 +156,7 @@ class GameState with ChangeNotifier {
     }
 
     // Return the dish with the most matches (or an empty dish if none match)
-    return closestMatch ?? Dish(name: '', ingredients: [], prepTime: 0, satisfiesTags: [], unlockLevel: 1);
+    return closestMatch ?? Dish(name: '', ingredients: [], prepTime: 0, satisfiesTags: [], unlockLevel: 1, imagePath: '');
   }
 
 

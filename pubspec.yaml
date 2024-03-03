@@ -86,6 +86,10 @@ flutter:
     - assets/images/backgrounds/preparation-area.png
     - assets/images/backgrounds/game-background.png
     - assets/images/environment/pot.png
+    - assets/images/dishes/salmon-quinoa-bowl.png
+    - assets/images/dishes/garden-salad.png
+    - assets/images/dishes/creamy-cashew-curry.png
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

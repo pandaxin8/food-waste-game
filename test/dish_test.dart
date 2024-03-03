@@ -8,7 +8,7 @@ void main() {
 
     test('Salad satisfies a gluten-free, calorie-conscious guest', () {
       // Set up sample data
-      Dish dish1 = Dish(name: 'Salad', satisfiesTags: [], prepTime: 5, unlockLevel:1, ingredients: [
+      Dish dish1 = Dish(name: 'Salad', satisfiesTags: [], prepTime: 5, unlockLevel:1, imagePath: '',ingredients: [
         Ingredient(name: 'Tomato', imageUrl: '...', dietaryTags: ['vegetarian'], calories: 20),
         Ingredient(name: 'Lettuce', imageUrl: '...', dietaryTags: ['vegetarian', 'vegan'], calories: 10)
       ]);
