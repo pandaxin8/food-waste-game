@@ -1,6 +1,6 @@
 # food_waste_game
 
-## Food Waste Awareness Game
+## Green Paw Chefs: A Food Waste Awareness Game
 
 This game is designed to educate and raise awareness about the importance of reducing food waste. Built with Flutter, it challenges players to manage a virtual restaurant, where they must carefully select ingredients, prepare dishes that cater to the diverse preferences of guests, and minimize waste. The game progresses through increasingly challenging levels, introducing various dietary restrictions, calorie-conscious meal planning, and an ingredient inventory management system.
 
@@ -16,8 +16,33 @@ Features
 
 To install and run the Food Waste Awareness Game, follow these steps:
 1. Ensure you have Flutter installed on your machine. If not, follow the installation guide on the Flutter official website.
-2. Clone the repository to your local machine:
-
+- For Windows:
+  - Download the Flutter SDK from the official Flutter website.
+  - Extract the downloaded ZIP file to a location on your computer (e.g., C:\flutter).
+  - Add the Flutter bin directory to your system PATH:
+    - Search for "Environment Variables" in the Windows search bar and open it.
+    - Select "Path" from the "System Variables" section and click "Edit".
+    - Click "New" and add the path to the Flutter bin directory (e.g., C:\flutter\bin).
+    - Click "OK" to save the changes.
+  - For macOS:
+    - Follow the instructions on the official Flutter website.
+    - Ensure that you have Xcode installed from the App Store.
+2. Install Android Studio / Xcode:
+ - For Windows:
+   - Download and install Android Studio from the official website.
+   - Follow the setup instructions to install the Android SDK and configure it with Flutter.
+  - For macOS:
+    - Install Xcode from the App Store.
+3. Clone the repository to your local machine:
+- For Windows:
+  - Download and install Git from the official Git website.
+- For macOS:
+  - Git usually comes pre-installed with macOS. If not, you can install it using Homebrew or download it from the official Git website.
+    
+- Open Command Prompt (Windows) or Terminal (macOS).
+- Navigate to the directory where you want to clone the project using the cd command.
+  
+Run the following command to clone the project:
 ```
 git clone https://github.com/yourrepository/food_waste_game.git
 ```
@@ -30,6 +55,16 @@ cd food_waste_game
 flutter pub get
 ```
 7. Run the app on your preferred device (emulator or physical device):
+- For Windows:
+  - Ensure that an Android emulator or a physical Android device is connected and recognized by Flutter. You can also use a web browser as your target device e.g. Chrome.
+  - Run the following command to start the app:
+```
+flutter run
+```
+- For macOS:
+  - Ensure that either an iOS simulator or a physical iOS device is connected and recognized by Flutter.
+  - Run the following command to start the app:
+
 ```
 flutter run
 ```
