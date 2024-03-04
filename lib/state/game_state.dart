@@ -1,17 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:food_waste_game/models/level.dart';
+import 'package:food_waste_game/models/objective.dart';
 import 'package:food_waste_game/models/player.dart';
+import 'package:food_waste_game/screens/preparation_area.dart';
 import 'package:food_waste_game/services/data_service.dart';
 import 'package:provider/provider.dart'; 
 import '../models/ingredient.dart';
 import '../models/guest.dart';
 import '../models/dish.dart';
 
+
+
 class GameState with ChangeNotifier {
   int _score = 0;
   int _wasteAmount = 0;
-  int _currentLevel = 1;
   List<Ingredient> _availableIngredients = [];
   List<Guest> _currentGuests = [];
   List<Dish> _availableDishes = [];
@@ -21,6 +25,11 @@ class GameState with ChangeNotifier {
   final DataService _dataService = DataService();
 
   Player? currentPlayer; // hold the current player's data
+
+  Level? currentLevel;
+  int _currentLevel = 1;
+
+  List<Ingredient> _selectedIngredients = [];
 
 
   Future<void> _loadInitialData() async {
@@ -35,6 +44,7 @@ class GameState with ChangeNotifier {
       _availableDishes = await _dataService.getDishes();
       print('Dishes fetched: $_availableDishes');
       notifyListeners();
+      
     } catch (error) {
       print('Error loading initial data: $error');
     }
@@ -55,25 +65,29 @@ class GameState with ChangeNotifier {
       //Guest(name: 'Bob', iconUrl: 'assets/images/characters/chef-cat-1.png', preferences: ['vegan'], dietaryRestrictions: ['no-tomato'], maxCalories: 500),
       // ... more guests here
     ];
+    
   }
 
   // accessors - getters
   int get score => _score;
   int get wasteAmount => _wasteAmount;
-  int get currentLevel => _currentLevel;
   List<Ingredient> get availableIngredients => _availableIngredients;  
   List<Guest> get currentGuests => _currentGuests;
   List<Dish> get availableDishes => _availableDishes;
+  Level? get currentLevelObject => currentLevel;
+  List<Ingredient> get selectedIngredients => _selectedIngredients;
   
   
 
   // methods to modify the state
 
-  void startNewGame() {
+
+  Future<void> startNewGame(BuildContext context) async {
     _score = 0;
     _wasteAmount = 0;
-    _currentLevel = 1;
-    _loadLevel(_currentLevel); // Fetch level data
+    await _loadLevel(_currentLevel);
+    showLevelStartModal(context);
+    
   }
 
   // Simple feedback display (also in GameState)
@@ -94,15 +108,30 @@ class GameState with ChangeNotifier {
   }
 
   void submitDish(List<Ingredient> selectedIngredients, BuildContext context) {
+    // 1. Filter for Selected Ingredients:
+    final ingredientsForDish = selectedIngredients.where((ingredient) => ingredient.isSelected).toList();
+
+    // 1. Find Unselected Ingredients in Preparation Area:
+    final unselectedIngredients = selectedIngredients.where((ingredient) => !ingredient.isSelected).toList(); 
+
+  // 2. Handle the unselected ingredients (you have options):
+    // Option A: Directly penalize waste
+      // _wasteAmount += calculateWastePenalty(unselectedIngredients); // You'll need to define how the penalty is calculated
+
+    // Check if any ingredients remain (in case none were selected):
+    if(ingredientsForDish.isEmpty) {
+      _showFeedback('Please select some ingredients before cooking', context);
+      return; // Early exit if no ingredients were selected
+    }
     // Check if the selected ingredients can form a valid dish.
-    if (canFormDish(selectedIngredients)) {
+    if (canFormDish(ingredientsForDish)) {
       print('submitDish: can form a valid dish');
       // If they can, create the dish and check against the guest's preferences.
       Dish dish = Dish(
         name: 'Custom Dish', // You might want to generate a name based on ingredients.
-        ingredients: selectedIngredients,
+        ingredients: ingredientsForDish,
         prepTime: 10, // Placeholder value for prepTime.
-        satisfiesTags: calculateSatisfiesTags(selectedIngredients),
+        satisfiesTags: calculateSatisfiesTags(ingredientsForDish),
         unlockLevel: 1,
         imagePath: '',
       );
@@ -121,16 +150,31 @@ class GameState with ChangeNotifier {
       }
 
       // Clear the selected ingredients after submission.
-      selectedIngredients.clear();
       print('selectedIngredients cleared');
     } else {
       // _showFeedback('This combination doesn\'t make a dish.', context);
       // Provide a hint about what dish they might have been trying to make
-      Dish closestMatch = findClosestRecipeMatch(selectedIngredients);
+      Dish closestMatch = findClosestRecipeMatch(ingredientsForDish);
       _showFeedback('Almost! Did you mean to make a ${closestMatch.name}?', context);
     }
 
+    checkObjective2Completion(ingredientsForDish); // Check after dish creation
+    deselectIngredients(ingredientsForDish);
+    ingredientsForDish.clear();
+
+    if (!unselectedIngredients.isEmpty) {
+      String wastedIngredientsList = unselectedIngredients.map((ingredient) => ingredient.name).join(', '); // Build a comma-separated list of wasted ingredients
+      _showFeedback("These ingredients went to waste: $wastedIngredientsList", context);
+    }
     notifyListeners(); // Notify UI to rebuild.
+    
+  }
+
+  void deselectIngredients(List<Ingredient> ingredients) {
+    for (Ingredient ingredient in ingredients) {
+      final matchingIngredient = availableIngredients.firstWhere((i) => i.name == ingredient.name);
+      matchingIngredient.isSelected = false; 
+    }
   }
 
   // Helper method to find the closest recipe match based on selected ingredients
@@ -162,11 +206,6 @@ class GameState with ChangeNotifier {
 
   // Check if the selected ingredients form a valid dish.
   bool canFormDish(List<Ingredient> selectedIngredients) {
-    // TODO: fetch recipes (if not already loaded) 
-    // and compare selected ingredients against recipe to see if there's a match
-    // Placeholder logic for checking if we have a valid dish.
-    // This should be replaced with the actual game logic for defining a dish.
-
     for (var dish in _availableDishes) {
       var recipeIngredients = dish.ingredients.map((i) => i.name).toSet();
       var selectedIngredientsNames = selectedIngredients.map((i) => i.name).toSet();
@@ -266,8 +305,6 @@ class GameState with ChangeNotifier {
     return _availableDishes.where((dish) => player.unlockedDishes.contains(dish.name)).toList();
   }
 
-  
-
 
   // Helper function to calculate the list of tags based on selected ingredients.
   List<String> calculateSatisfiesTags(List<Ingredient> ingredients) {
@@ -336,22 +373,6 @@ class GameState with ChangeNotifier {
   }
 
 
-  // void updatePlayerLevel(int newScore, BuildContext context) async {
-  //   Player? currentPlayer = await loadCurrentPlayer();
-  //   if (currentPlayer != null) {
-  //     // Example logic to increase level based on new score
-  //     // This is simplified and should be adjusted according to your game's logic
-  //     int newLevel = currentPlayer.currentLevel + (newScore ~/ 100); // Example progression logic
-  //     currentPlayer.currentLevel = newLevel;
-  //     // Save updated player data
-  //     await updatePlayerData(currentPlayer);
-  //     // Check for any new recipe unlocks
-  //     await checkForUnlockedRecipes(currentPlayer, context);
-  //   }
-  // }
-
-  
-
   // Example method to update player level and check for recipe unlocks
 Future<void> updatePlayerLevelAndCheckUnlocks(int newScore, BuildContext context) async {
     Player? currentPlayer = await loadCurrentPlayer();
@@ -368,20 +389,132 @@ Future<void> updatePlayerLevelAndCheckUnlocks(int newScore, BuildContext context
     }
   }
 
-  void onLevelComplete(int scoreEarned, BuildContext context) async {
-    // Assume this function is called when a level is completed
-    await updatePlayerLevelAndCheckUnlocks(scoreEarned, context);
-    // Proceed to next level or show level completion UI
+
+  Future<void> _loadLevel(int levelNumber) async { // Change return type to Future<void>
+  DocumentSnapshot levelDoc = await FirebaseFirestore.instance.collection('levels').doc('level-$levelNumber').get();
+  if (levelDoc.exists) {
+    currentLevel = await Level.fromDocument(levelDoc); 
+    print('currentLevel: $currentLevel');
+    notifyListeners();
+    print('level doc exists');
+  } else {
+    // Handle the case where the level does not exist.
+    print('level doc doesn\'t exists');
+  }
+}
+
+  // This method will check if the objectives for the current level have been completed.
+  bool checkIfObjectivesCompleted() {
+    if (currentLevel == null) {
+      return false; // or handle this case appropriately
+    }
+
+    // Check if all objectives are completed
+    return currentLevel!.objectives.every((objective) => objective.isCompleted);
+  }
+
+  void onLevelComplete() {
+    if (currentLevel == null) {
+      return; // or handle this case appropriately
+    }
+
+    // Unlock level rewards and advance to the next level
+    unlockLevelRewards();
+    advanceToNextLevel();
   }
 
 
+  void performActionThatCompletesObjective(Objective objective) {
+    // If the objective is not already completed, complete it
+    if (!objective.isCompleted) {
+      objective.complete();
 
-
-  void _loadLevel(int levelNumber) {
-    // ... logic to fetch level data (guests, ingredients) based on levelNumber
-    // ... update _currentGuests and _availableIngredients 
-    notifyListeners(); 
+      // Check if all objectives are now completed
+      if (checkIfObjectivesCompleted()) {
+        onLevelComplete();
+      }
+      notifyListeners();
+    }
   }
+
+  // Method to unlock rewards
+  void unlockLevelRewards() {
+    if (currentLevel == null) {
+      return; // or handle this case appropriately
+    }
+
+    // Handle rewards based on `currentLevel.unlocks`
+    // ...
+  }
+
+  // Method to advance to the next level
+  void advanceToNextLevel() {
+    // Increase `_currentLevel` int value
+    _currentLevel++;
+
+    // Fetch the next level's data and set `currentLevel`
+    // ...
+  }
+
+    void showLevelStartModal(BuildContext context) {
+      showDialog(
+        context: context,
+        barrierDismissible: false, // Prevent closing the modal by tapping outside
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Level Objectives'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min, // Important for scrollable objectives
+              children: [
+                // Display the objectives here (more on this later)
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Dismiss the modal
+                },
+                child: Text('Got it!'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+    void checkObjective1Completion(List<Ingredient> selectedIngredients) {
+      print('checking objective completion');
+      // Objective 1: Select Tomato and Spinach...
+      print('current level objectives:');
+      print(currentLevel!.objectives);
+      final objective1 = currentLevel!.objectives.firstWhere((obj) => obj.id == "1-1");
+      if (availableIngredients.any((ingredient) => ingredient.name == 'Tomato' && ingredient.isSelected) && availableIngredients.any((ingredient) => ingredient.name == 'Spinach' && ingredient.isSelected)) {
+        objective1.complete();
+      }
+      print(objective1.isCompleted);
+
+      notifyListeners();
+    }
+
+    // Objective 2: Combine selected ingredients...
+    void checkObjective2Completion(List<Ingredient> selectedIngredients) {
+      final objective2 = currentLevel!.objectives.firstWhere((obj) => obj.id == "1-2");
+      if (_selectedIngredients.any((ingredient) => ingredient.name == 'Tomato') &&
+          _selectedIngredients.any((ingredient) => ingredient.name == 'Spinach') && _selectedIngredients.length == 2) {
+        objective2.complete();
+      }
+      print(objective2.isCompleted);
+
+      // Notify UI if there were changes:
+      notifyListeners();
+
+    }
+
+
+    
+  
+
+
 
 
 

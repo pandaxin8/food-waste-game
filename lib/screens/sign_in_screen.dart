@@ -106,6 +106,7 @@ Widget build(BuildContext context) {
               ),
                 SizedBox(height: 16), // Spacing between textfields
                 TextField(
+                obscureText: true,
                 controller: _passwordController,
                 decoration: InputDecoration(
                   labelText: 'Password',

@@ -25,9 +25,10 @@ class MainMenuScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   // Handle New Game action
-                  Provider.of<GameState>(context, listen: false).startNewGame(); 
+                  //Provider.of<GameState>(context, listen: false).startNewGame(context); 
+                  await Provider.of<GameState>(context, listen: false).startNewGame(context); // Await for startNewGame to complete 
                   Navigator.pushReplacementNamed(context, AppRoutes.gameScreen);
                   Provider.of<GameState>(context, listen: false).loadCurrentPlayerData();
                 },

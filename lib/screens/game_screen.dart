@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:food_waste_game/main.dart';
 import 'package:food_waste_game/models/dish.dart';
 import 'package:food_waste_game/screens/preparation_area.dart';
+import 'package:food_waste_game/widgets/objective_tracker.dart';
 import 'package:provider/provider.dart';
 import '../state/game_state.dart';
 import '../widgets/guest_profile_widget.dart';
@@ -23,7 +24,6 @@ class GameScreen extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Level completed! Checking for new recipes...')));
     });
   }
-
 
   void _showAvailableDishes(BuildContext context) {
     showModalBottomSheet(
@@ -162,30 +162,42 @@ Widget build(BuildContext context) {
         );
       },
     ),
-    body: Container(
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage('/images/backgrounds/game-background.png'),
-          fit: BoxFit.cover,
+    body: Stack(
+      children: [
+        Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('/images/backgrounds/game-background.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Consumer<GameState>(
+          builder: (context, gameState, child) {
+            return Column(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Wrap(
+                    children: gameState.availableIngredients.map((ingredient) => IngredientWidget(ingredient)).toList(),
+                  ),
+                ),
+                PreparationArea(selectedIngredients: gameState.selectedIngredients),
+                WasteMeter(wasteLevel: gameState.wasteAmount),
+              ],
+            );
+          },
         ),
       ),
-      child: Consumer<GameState>(
-        builder: (context, gameState, child) {
-          return Column(
-            children: [
-              Expanded(
-                flex: 3,
-                child: Wrap(
-                  children: gameState.availableIngredients.map((ingredient) => IngredientWidget(ingredient)).toList(),
-                ),
-              ),
-              PreparationArea(),
-              WasteMeter(wasteLevel: gameState.wasteAmount),
-            ],
-          );
-        },
+      Flexible(
+        child: Positioned( // Position the container for the tracker
+          top: 100,
+          right: 20,
+          child: ObjectiveTracker(),
+        ),
       ),
+      ],
     ),
+
   );
 }
 
