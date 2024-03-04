@@ -27,8 +27,8 @@ class Ingredient {
       dietaryTags: List<String>.from(doc.get('dietaryTags')),
       calories: doc.get('calories') as int,
       isSelected: false,
-      freshness: doc.get('freshness') as int? ?? 100,  // Read from Firestore, default to 100
-      isLocal: doc.get('isLocal') as bool? ?? false,   // Read from Firestore, default to false
+      freshness: 100,  
+      isLocal: false, //Read from Firestore, default to false
     );
   }
 

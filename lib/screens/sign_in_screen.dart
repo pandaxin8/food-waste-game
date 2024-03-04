@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:food_waste_game/services/background_music_service.dart';
 import 'package:food_waste_game/state/game_state.dart';
 import 'package:provider/provider.dart';
+
 
 
 
@@ -27,21 +29,31 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   void _signInAnonymously() async {
-    try {
-      final userCredential = await _auth.signInAnonymously();
-      if (userCredential.user != null) {
-        // Load user-specific data here before navigating
-        // Example: Loading player data
-        await Provider.of<GameState>(context, listen: false).loadCurrentPlayerData();
-        checkCurrentUser();
+  try {
+    final userCredential = await _auth.signInAnonymously();
+    if (!mounted) return; // Add this check
 
-        Navigator.pop(context); // Navigates back to the main screen, data is ready
-      }
-    } catch (e) {
-      // Handle errors, e.g., show an alert dialog
-      print(e); // Consider replacing this with a more user-friendly error handling
+    if (userCredential.user != null) {
+      // Load user-specific data here before navigating
+      await Provider.of<GameState>(context, listen: false).loadCurrentPlayerData();
+      if (!mounted) return; // Check again because another async gap occurred
+
+      checkCurrentUser();
+
+      // Provider.of<BackgroundMusicService>(context, listen: false).pauseBackgroundMusic();
+      // if (!mounted) return; // It's good practice to check before using context
+
+      // await Provider.of<BackgroundMusicService>(context, listen: false).startBackgroundMusic();
+      // if (!mounted) return; // And again, especially before navigating
+
+      Navigator.pop(context); // Navigates back to the main screen, data is ready
     }
+  } catch (e) {
+    if (!mounted) return; // Also check here before showing any dialog or using context
+    // Handle errors, e.g., show an alert dialog
+    print(e); // Consider replacing this with a more user-friendly error handling
   }
+}
 
   void _signInWithEmailAndPassword() async {
     try {
@@ -55,7 +67,10 @@ class _SignInScreenState extends State<SignInScreen> {
         await Provider.of<GameState>(context, listen: false).loadCurrentPlayerData();
         checkCurrentUser();
 
+        Provider.of<BackgroundMusicService>(context, listen: false).pauseBackgroundMusic();
+        await Provider.of<BackgroundMusicService>(context, listen: false).startBackgroundMusic();
         Navigator.pop(context); // Navigates back to the main screen, data is ready
+        
       }
     } catch (e) {
       // Handle errors, e.g., show an alert dialog
@@ -125,7 +140,10 @@ Widget build(BuildContext context) {
 
                 SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _signInWithEmailAndPassword,
+                onPressed: () {
+                  _signInWithEmailAndPassword();
+                  Provider.of<BackgroundMusicService>(context, listen: false).startBackgroundMusic();
+                },
                 child: Text('Sign In'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF8B4513), // Woody brown color
@@ -134,7 +152,10 @@ Widget build(BuildContext context) {
               ),
               SizedBox(height: 20), // Spacing between buttons
               ElevatedButton(
-                onPressed: _signInAnonymously,
+                onPressed: () {
+                  _signInAnonymously();
+                  Provider.of<BackgroundMusicService>(context, listen: false).startBackgroundMusic();
+                },
                 child: Text('Continue as Guest'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF8B4513), // Woody brown color
