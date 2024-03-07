@@ -58,10 +58,9 @@ class GameScreen extends StatelessWidget {
   void _simulateLevelCompletion(BuildContext context) {
     final gameState = Provider.of<GameState>(context, listen: false);
     // Simulate achieving a new score (example: 150 points)
-    gameState.loadCurrentPlayerData();
     gameState.updatePlayerLevelAndCheckUnlocks(150, context).then((_) {
-      // After updating, you might want to refresh certain parts of your UI or show a confirmation message
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Level completed! Checking for new recipes...')));
+      // Call onLevelComplete with context when the level is considered completed
+      gameState.onLevelComplete(context);
     });
   }
 

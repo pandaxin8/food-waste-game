@@ -86,6 +86,7 @@ flutter:
     - assets/images/backgrounds/ingredient-shelves.png
     - assets/images/backgrounds/preparation-area.png
     - assets/images/backgrounds/game-background.png
+    - assets/images/backgrounds/level-summary-background.png
     - assets/images/environment/pot.png
     - assets/images/dishes/salmon-quinoa-bowl.png
     - assets/images/dishes/garden-salad.png

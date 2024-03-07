@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:food_waste_game/models/level.dart';
 import 'package:food_waste_game/models/objective.dart';
 import 'package:food_waste_game/models/player.dart';
+import 'package:food_waste_game/screens/level_summary_screen.dart';
 import 'package:food_waste_game/screens/preparation_area.dart';
 import 'package:food_waste_game/services/data_service.dart';
 import 'package:provider/provider.dart'; 
@@ -30,6 +31,8 @@ class GameState with ChangeNotifier {
   int _currentLevel = 1;
 
   List<Ingredient> _selectedIngredients = [];
+
+  List<Dish> _madeDishes = [];
 
 
   Future<void> _loadInitialData() async {
@@ -76,6 +79,7 @@ class GameState with ChangeNotifier {
   List<Dish> get availableDishes => _availableDishes;
   Level? get currentLevelObject => currentLevel;
   List<Ingredient> get selectedIngredients => _selectedIngredients;
+  List<Dish> get madeDishes => _madeDishes;
   
   
 
@@ -127,14 +131,15 @@ class GameState with ChangeNotifier {
     if (canFormDish(ingredientsForDish)) {
       print('submitDish: can form a valid dish');
       // If they can, create the dish and check against the guest's preferences.
-      Dish dish = Dish(
-        name: 'Custom Dish', // You might want to generate a name based on ingredients.
-        ingredients: ingredientsForDish,
-        prepTime: 10, // Placeholder value for prepTime.
-        satisfiesTags: calculateSatisfiesTags(ingredientsForDish),
-        unlockLevel: 1,
-        imagePath: '',
-      );
+      // Dish dish = Dish(
+      //   name: 'Custom Dish', // You might want to generate a name based on ingredients.
+      //   ingredients: ingredientsForDish,
+      //   prepTime: 10, // Placeholder value for prepTime.
+      //   satisfiesTags: calculateSatisfiesTags(ingredientsForDish),
+      //   unlockLevel: 1,
+      //   imagePath: '',
+      // );
+      Dish dish = findClosestRecipeMatch(selectedIngredients);
 
       // Check if the created dish satisfies the current guest's preferences.
       // Assuming one guest for MVP. Update logic for multiple guests.
@@ -144,6 +149,9 @@ class GameState with ChangeNotifier {
       if (dishMatched) {
         _score += 20; // Increment the score.
         _showFeedback('Delicious! The guest loved it!', context);
+
+        // Add the dish to the list of made dishes
+        _madeDishes.add(dish);
       } else {
         _wasteAmount += 10; // Increment the waste amount.
         _showFeedback('Oh no! The guest did not like it.', context);
@@ -162,12 +170,18 @@ class GameState with ChangeNotifier {
     deselectIngredients(ingredientsForDish);
     ingredientsForDish.clear();
 
-    if (!unselectedIngredients.isEmpty) {
+    if (unselectedIngredients.isNotEmpty) {
       String wastedIngredientsList = unselectedIngredients.map((ingredient) => ingredient.name).join(', '); // Build a comma-separated list of wasted ingredients
       _showFeedback("These ingredients went to waste: $wastedIngredientsList", context);
+      _wasteAmount += 10 * unselectedIngredients.length;
     }
     notifyListeners(); // Notify UI to rebuild.
     
+  }
+
+  void resetLevelState() {
+    _madeDishes.clear();
+    // Reset other necessary properties for a new level
   }
 
   void deselectIngredients(List<Ingredient> ingredients) {
@@ -413,7 +427,7 @@ Future<void> updatePlayerLevelAndCheckUnlocks(int newScore, BuildContext context
     return currentLevel!.objectives.every((objective) => objective.isCompleted);
   }
 
-  void onLevelComplete() {
+  void onLevelComplete(BuildContext context) {
     if (currentLevel == null) {
       return; // or handle this case appropriately
     }
@@ -421,17 +435,23 @@ Future<void> updatePlayerLevelAndCheckUnlocks(int newScore, BuildContext context
     // Unlock level rewards and advance to the next level
     unlockLevelRewards();
     advanceToNextLevel();
+
+    // Navigate to the LevelSummaryScreen
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => LevelSummaryScreen(gameState: this)),
+    );
   }
 
 
-  void performActionThatCompletesObjective(Objective objective) {
+  void performActionThatCompletesObjective(BuildContext context, Objective objective) {
     // If the objective is not already completed, complete it
     if (!objective.isCompleted) {
       objective.complete();
 
       // Check if all objectives are now completed
       if (checkIfObjectivesCompleted()) {
-        onLevelComplete();
+        onLevelComplete(context);
       }
       notifyListeners();
     }
@@ -454,6 +474,11 @@ Future<void> updatePlayerLevelAndCheckUnlocks(int newScore, BuildContext context
 
     // Fetch the next level's data and set `currentLevel`
     // ...
+
+    // After advancing to the next level, you may want to navigate to the summary screen
+    // However, this depends on your game's flow. If advancing to the next level should immediately
+    // show a summary, include navigation here. Otherwise, it may be better to handle navigation
+    // separately after showing some kind of "Level Complete" message or animation.
   }
 
     void showLevelStartModal(BuildContext context) {
