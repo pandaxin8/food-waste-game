@@ -65,12 +65,17 @@ class _LevelSummaryScreenState extends State<LevelSummaryScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF8B4513),
                     padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 16.0), // Bigger button padding
-                    shape: RoundedRectangleBorder( // Rounded corners
-                      borderRadius: BorderRadius.circular(30.0),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
                   ),
-                  onPressed: () {
-                    // Logic to either go back to the main menu or the next level
+                  onPressed: () async {
+                    // Assuming you've ensured all necessary user interactions with notifications/dialogs are complete,
+                    // you can now proceed to advance to the next level.
+                    await widget.gameState.advanceToNextLevel(context);
+                    
+                    // If unlockLevelRewards is refactored to not immediately need context
+                    // or if you're handling notifications in a way that doesn't block navigation
+                    widget.gameState.unlockLevelRewards(context);
+                  
                   },
                   child: Text('Continue', style: TextStyle(fontSize: 20, color: Colors.white)),
                 ),

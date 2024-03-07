@@ -4,13 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:food_waste_game/models/level.dart';
 import 'package:food_waste_game/models/objective.dart';
 import 'package:food_waste_game/models/player.dart';
+import 'package:food_waste_game/models/unlock-notification.dart';
+import 'package:food_waste_game/screens/game_screen.dart';
 import 'package:food_waste_game/screens/level_summary_screen.dart';
-import 'package:food_waste_game/screens/preparation_area.dart';
 import 'package:food_waste_game/services/data_service.dart';
-import 'package:provider/provider.dart'; 
+import 'package:food_waste_game/widgets/notification_widget.dart';
 import '../models/ingredient.dart';
 import '../models/guest.dart';
 import '../models/dish.dart';
+
+
 
 
 
@@ -44,8 +47,8 @@ class GameState with ChangeNotifier {
       // ... Potentially load guests here too: _currentGuests = await _dataService.getGuests();
       _currentGuests = await _dataService.getGuests();
       print('Guests fetched: $_currentGuests');
-      _availableDishes = await _dataService.getDishes();
-      print('Dishes fetched: $_availableDishes');
+      // _availableDishes = await _dataService.getDishes();
+      // print('Dishes fetched: $_availableDishes');
       notifyListeners();
       
     } catch (error) {
@@ -90,7 +93,9 @@ class GameState with ChangeNotifier {
     _score = 0;
     _wasteAmount = 0;
     await _loadLevel(_currentLevel);
-    showLevelStartModal(context);
+    // showLevelStartModal(context);
+    _availableDishes = await _dataService.getDishesForLevel(_currentLevel);
+    notifyListeners();
     
   }
 
@@ -405,17 +410,17 @@ Future<void> updatePlayerLevelAndCheckUnlocks(int newScore, BuildContext context
 
 
   Future<void> _loadLevel(int levelNumber) async { // Change return type to Future<void>
-  DocumentSnapshot levelDoc = await FirebaseFirestore.instance.collection('levels').doc('level-$levelNumber').get();
-  if (levelDoc.exists) {
-    currentLevel = await Level.fromDocument(levelDoc); 
-    print('currentLevel: $currentLevel');
-    notifyListeners();
-    print('level doc exists');
-  } else {
-    // Handle the case where the level does not exist.
-    print('level doc doesn\'t exists');
+    DocumentSnapshot levelDoc = await FirebaseFirestore.instance.collection('levels').doc('level-$levelNumber').get();
+    if (levelDoc.exists) {
+      currentLevel = await Level.fromDocument(levelDoc); 
+      print('currentLevel: ${currentLevel!.levelNumber}');
+      notifyListeners();
+      print('level doc exists');
+    } else {
+      // Handle the case where the level does not exist.
+      print('level doc doesn\'t exists');
+    }
   }
-}
 
   // This method will check if the objectives for the current level have been completed.
   bool checkIfObjectivesCompleted() {
@@ -429,83 +434,149 @@ Future<void> updatePlayerLevelAndCheckUnlocks(int newScore, BuildContext context
 
   void onLevelComplete(BuildContext context) {
     if (currentLevel == null) {
-      return; // or handle this case appropriately
+      print('Error: No current level data.');
+      return; // Handle this case as needed
     }
 
-    // Unlock level rewards and advance to the next level
-    unlockLevelRewards();
-    advanceToNextLevel();
+    // Check if all objectives for the level are completed
+    if (checkIfObjectivesCompleted()) {
+      // Navigate to the Level Summary Screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LevelSummaryScreen(gameState: this),
+        ),
+      );
+    } else {
+      print('The level is not yet completed.');
+    }
+  }
 
-    // Navigate to the LevelSummaryScreen
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => LevelSummaryScreen(gameState: this)),
-    );
+
+  void onPlayerAction(BuildContext context) {
+    // Player performs an action, e.g., placing an ingredient, completing a dish, etc.
+
+    // ... actions take place ...
+
+    // Now check if the action completed the level
+    bool levelIsComplete = checkIfObjectivesCompleted();
+    if (levelIsComplete) {
+      onLevelComplete(context);
+    }
   }
 
 
-  void performActionThatCompletesObjective(BuildContext context, Objective objective) {
-    // If the objective is not already completed, complete it
-    if (!objective.isCompleted) {
-      objective.complete();
+  // void performActionThatCompletesObjective(BuildContext context, Objective objective) {
+  //   // If the objective is not already completed, complete it
+  //   if (!objective.isCompleted) {
+  //     objective.complete();
 
-      // Check if all objectives are now completed
-      if (checkIfObjectivesCompleted()) {
-        onLevelComplete(context);
-      }
-      notifyListeners();
-    }
-  }
+  //     // Check if all objectives are now completed
+  //     if (checkIfObjectivesCompleted()) {
+  //       onLevelComplete(context);
+  //     }
+  //     notifyListeners();
+  //   }
+  // }
 
   // Method to unlock rewards
-  void unlockLevelRewards() {
-    if (currentLevel == null) {
-      return; // or handle this case appropriately
-    }
+  void unlockLevelRewards(BuildContext context) {
+    // Use a null check before trying to access the `unlocks` property
+    print('currentLevel: ${currentLevel!.levelNumber}');
+    if (currentLevel != null) {
+      // Assuming `unlocks` is a list of strings describing what has been unlocked
+      for (String unlock in currentLevel!.unlocks) { // Use the null assertion operator '!' after null checking
+        // Create a notification for each unlock
+        UnlockNotification notification = UnlockNotification(
+          'Congratulations!', // Customize this title
+          'You have unlocked: $unlock', // The message showing what has been unlocked
+          Icons.star, // Choose an icon that makes sense for your reward
+        );
 
-    // Handle rewards based on `currentLevel.unlocks`
-    // ...
+        // Show the notification
+        showUnlockNotification(context, notification);
+      }
+
+      for (Dish dish in currentLevel!.newDishes) { // Use the null assertion operator '!' after null checking
+        // Create a notification for each unlock
+        UnlockNotification notification = UnlockNotification(
+          'Congratulations!', // Customize this title
+          'You have unlocked: ${dish.name}', // The message showing what has been unlocked
+          dish.imagePath, // Choose an icon that makes sense for your reward
+        );
+
+        // Show the notification
+        showUnlockNotification(context, notification);
+      }
+
+      
+    
+      // ... Your logic for actually unlocking the rewards ...
+    } else {
+      // Handle the case where `currentLevel` is null
+      // You could show an error or log this situation as it should not happen in normal game flow
+    }
   }
+
 
   // Method to advance to the next level
-  void advanceToNextLevel() {
-    // Increase `_currentLevel` int value
+  Future<void> advanceToNextLevel(BuildContext context) async {
     _currentLevel++;
+    try {
+      DocumentSnapshot levelDoc = await FirebaseFirestore.instance
+          .collection('levels')
+          .doc('level-$_currentLevel')
+          .get();
 
-    // Fetch the next level's data and set `currentLevel`
-    // ...
-
-    // After advancing to the next level, you may want to navigate to the summary screen
-    // However, this depends on your game's flow. If advancing to the next level should immediately
-    // show a summary, include navigation here. Otherwise, it may be better to handle navigation
-    // separately after showing some kind of "Level Complete" message or animation.
+      if (levelDoc.exists) {
+        currentLevel = await Level.fromDocument(levelDoc);
+        _availableDishes = await _dataService.getDishesForLevel(_currentLevel);
+        notifyListeners();
+        
+        if (currentLevel != null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => GameScreen(level: currentLevel!),
+            ),
+          );
+        } else {
+          print('current level is null');
+        }
+      } 
+    } catch (e) {
+      print('Error advancing to next level: $e');
+    }
   }
 
-    void showLevelStartModal(BuildContext context) {
-      showDialog(
-        context: context,
-        barrierDismissible: false, // Prevent closing the modal by tapping outside
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Level Objectives'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min, // Important for scrollable objectives
-              children: [
-                // Display the objectives here (more on this later)
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Dismiss the modal
-                },
-                child: Text('Got it!'),
-              ),
-            ],
-          );
-        },
-      );
-    }
+
+
+
+    // void showLevelStartModal(BuildContext context) {
+    //   showDialog(
+    //     context: context,
+    //     barrierDismissible: false, // Prevent closing the modal by tapping outside
+    //     builder: (BuildContext context) {
+    //       return AlertDialog(
+    //         title: const Text('Level Objectives'),
+    //         content: Column(
+    //           mainAxisSize: MainAxisSize.min, // Important for scrollable objectives
+    //           children: [
+    //             // Display the objectives here (more on this later)
+    //           ],
+    //         ),
+    //         actions: [
+    //           TextButton(
+    //             onPressed: () {
+    //               Navigator.of(context).pop(); // Dismiss the modal
+    //             },
+    //             child: Text('Got it!'),
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    // }
 
     void checkObjective1Completion(List<Ingredient> selectedIngredients) {
       print('checking objective completion');
@@ -535,10 +606,12 @@ Future<void> updatePlayerLevelAndCheckUnlocks(int newScore, BuildContext context
 
     }
 
-
-    
-  
-
+  void showUnlockNotification(BuildContext context, UnlockNotification notification) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => UnlockNotificationWidget(notification: notification),
+    );
+  }
 
 
 

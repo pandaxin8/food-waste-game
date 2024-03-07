@@ -1,4 +1,3 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:food_waste_game/screens/sign_in_screen.dart';
@@ -88,8 +87,20 @@ class _MyAppState extends State<MyApp> {
               initialRoute: AppRoutes.mainMenu,
               routes: {
                 AppRoutes.mainMenu: (context) => MainMenuScreen(),
-                AppRoutes.gameScreen: (context) => GameScreen(),
+                // AppRoutes.gameScreen: (context) => GameScreen(),
                 AppRoutes.signIn: (context) => SignInScreen(), 
+                // Ensure you have a level to pass, this might require fetching from GameState or similar
+                AppRoutes.gameScreen: (context) {
+                  // Ensure you have a level to pass, this might require fetching from GameState or similar
+                  final gameState = Provider.of<GameState>(context, listen: false);
+                  if (gameState.currentLevel != null) {
+                    return GameScreen(level: gameState.currentLevel!);
+                  } else {
+                    // Handle the case where currentLevel is null. Maybe navigate to an error page or a loading screen?
+                    // For simplicity, returning a placeholder here:
+                    return Scaffold(body: Center(child: Text("Level data is not available")));
+                  }
+                },
                 // Add other routes here
               },
               onGenerateRoute: (settings) {

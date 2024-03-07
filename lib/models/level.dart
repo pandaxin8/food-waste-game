@@ -13,6 +13,7 @@ class Level {
   final String educationalGoal;
   final List<Objective> objectives;
   final List<String> unlocks; // Items or mechanics unlocked after completing the level
+  final List<Dish> newDishes;
 
   //final int budget; // optional, for a resource challenge
 
@@ -24,6 +25,7 @@ class Level {
     required this.educationalGoal,
     required this.objectives,
     required this.unlocks,
+    required this.newDishes,
     //this.budget,
   });
 
@@ -35,11 +37,13 @@ class Level {
     var guestRefs = doc.get('guests').cast<DocumentReference>().toList(); // Add .toList()
     var ingredientRefs = doc.get('availableIngredients').cast<DocumentReference>().toList(); // Add .toList()
     var dishRefs = doc.get('availableDishes').cast<DocumentReference>().toList(); // Add .toList()
+    var newDishesRefs = doc.get('newDishes').cast<DocumentReference>().toList();
     
 
     var guests = await _getGuestsFromReferences(guestRefs.cast<DocumentReference>());
     var availableIngredients = await _getIngredientsFromReferences(ingredientRefs.cast<DocumentReference>());
     var availableDishes = await _getDishesFromReferences(dishRefs.cast<DocumentReference>());
+    var newDishes = await _getDishesFromReferences(newDishesRefs.cast<DocumentReference>());
 
     // Convert the objectives field from Firestore into Objective instances
 
@@ -60,6 +64,7 @@ class Level {
       educationalGoal: doc.get('educationalGoal') as String,
       objectives: objectives,
       unlocks: List<String>.from(doc.get('unlocks')),
+      newDishes: newDishes,
     );
   }
 

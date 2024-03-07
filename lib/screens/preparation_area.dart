@@ -99,7 +99,12 @@ class _PreparationAreaState extends State<PreparationArea> {
                       // 2. Submit Dish
                       gameState.submitDish(widget.selectedIngredients, context); 
 
-                      // 3. Clear Ingredients (if desired)
+                      // 3. After submitting the dish, check for level completion
+                      if (gameState.checkIfObjectivesCompleted()) {
+                        gameState.onLevelComplete(context);
+                      }
+
+                      // 4. Clear Ingredients (if desired)
                       setState(() {
                         widget.selectedIngredients.clear(); 
                       });

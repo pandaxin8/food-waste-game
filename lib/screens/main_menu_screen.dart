@@ -1,8 +1,6 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:food_waste_game/main.dart';
-import 'package:food_waste_game/screens/game_screen.dart';
 import 'package:provider/provider.dart';
 import '../state/game_state.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;

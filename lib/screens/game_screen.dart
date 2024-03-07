@@ -1,7 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:food_waste_game/main.dart';
 import 'package:food_waste_game/models/dish.dart';
+import 'package:food_waste_game/models/level.dart';
 import 'package:food_waste_game/screens/preparation_area.dart';
 import 'package:food_waste_game/services/background_music_service.dart';
 import 'package:food_waste_game/widgets/objective_tracker.dart';
@@ -10,6 +10,7 @@ import '../state/game_state.dart';
 import '../widgets/guest_profile_widget.dart';
 import '../widgets/ingredient_widget.dart';
 import '../widgets/waste_meter.dart';
+
 
 
 
@@ -54,6 +55,10 @@ void showObjectiveDialogue(BuildContext context, objectives) {
 
 
 class GameScreen extends StatelessWidget {
+  final Level level;
+
+  GameScreen({Key? key, required this.level}) : super(key: key);
+
   // Method to simulate completing a level and updating the player level
   void _simulateLevelCompletion(BuildContext context) {
     final gameState = Provider.of<GameState>(context, listen: false);
@@ -74,7 +79,8 @@ class GameScreen extends StatelessWidget {
 
             if (gameState.currentPlayer == null) {
               // For non-signed-in users, show Level 1 dishes
-              dishesToShow = gameState.dishesForLevel(1); // Assuming this method filters _availableDishes by level
+              //dishesToShow = gameState.dishesForLevel(1); // Assuming this method filters _availableDishes by level
+              dishesToShow = gameState.availableDishes;
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Sign in to unlock more dishes!")));
@@ -215,40 +221,42 @@ Widget build(BuildContext context) {
       },
     ),
     body: Stack(
-      children: [
-        Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/backgrounds/game-background.png'),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: Consumer<GameState>(
-          builder: (context, gameState, child) {
-            return Column(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: Wrap(
-                    children: gameState.availableIngredients.map((ingredient) => IngredientWidget(ingredient)).toList(),
-                  ),
-                ),
-                PreparationArea(selectedIngredients: gameState.selectedIngredients),
-                WasteMeter(wasteLevel: gameState.wasteAmount),
-              ],
-            );
-          },
+  children: [
+    // Background container with decoration
+    Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/images/backgrounds/game-background.png'),
+          fit: BoxFit.cover,
         ),
       ),
-      Flexible(
-        child: Positioned( // Position the container for the tracker
-          top: 100,
-          right: 20,
-          child: ObjectiveTracker(),
-        ),
-      ),
-      ],
     ),
+    // Consumer to build game elements based on GameState
+    Consumer<GameState>(
+      builder: (context, gameState, child) {
+        return Column(
+          children: [
+            Expanded(
+              flex: 3,
+              child: Wrap(
+                children: gameState.availableIngredients.map((ingredient) => IngredientWidget(ingredient)).toList(),
+              ),
+            ),
+            PreparationArea(selectedIngredients: gameState.selectedIngredients),
+            WasteMeter(wasteLevel: gameState.wasteAmount),
+          ],
+        );
+      },
+    ),
+    // Positioned ObjectiveTracker without Flexible
+    Positioned(
+      top: 100,
+      right: 20,
+      child: ObjectiveTracker(),
+    ),
+  ],
+),
+
 
   );
 }
