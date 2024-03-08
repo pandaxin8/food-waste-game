@@ -12,7 +12,7 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
-	<key>CFBundleName</key>
+	<key>Green Paw Chefs</key>
 	<string>food_waste_game</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
