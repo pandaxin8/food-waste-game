@@ -637,6 +637,13 @@ Future<void> updatePlayerLevelAndCheckUnlocks(int newScore, BuildContext context
     );
   }
 
+  void incrementWaste(Ingredient ingredient) {
+    // Increment the waste count here.
+    // You might want to check if the ingredient is already in the waste to avoid duplicates.
+    _wasteAmount += 10;
+    notifyListeners();
+  }
+
 
 
 

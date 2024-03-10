@@ -42,6 +42,15 @@ Widget build(BuildContext context) {
     _buildClosingRemarks(context),
   ];
 
+  // Ensure we're not going out of bounds
+  if (_tutorialStep < 0) {
+    _tutorialStep = 0;
+  } else if (_tutorialStep >= tutorialSteps.length) {
+    _tutorialStep = tutorialSteps.length - 1;
+  }
+
+Widget currentStep = tutorialSteps[_tutorialStep];
+
   return Scaffold(
     appBar: AppBar(
       title: Text('Tutorial'),
@@ -59,7 +68,7 @@ Widget build(BuildContext context) {
         SingleChildScrollView(
       child: Column(
         children: [
-          tutorialSteps[_tutorialStep],
+          currentStep,
           // if (_tutorialStep < tutorialSteps.length - 1) tutorialSteps[_tutorialStep],
           // if (_tutorialStep == tutorialSteps.length - 1)
             // ElevatedButton(

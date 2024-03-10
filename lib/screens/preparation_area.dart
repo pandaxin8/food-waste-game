@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:food_waste_game/models/ingredient.dart';
+import 'package:food_waste_game/widgets/ingredient_tile.dart';
 import 'package:provider/provider.dart';
-import '../models/dish.dart'; 
+import '../models/ingredient.dart';
 import '../state/game_state.dart';
-import 'dart:math' as math; 
-
 
 
 class PreparationArea extends StatefulWidget {
-  
   final List<Ingredient> selectedIngredients;
   final int maxIngredients;
 
   PreparationArea({
     required this.selectedIngredients,
-    this.maxIngredients = 5, // Set the maximum number of ingredients allowed
+    this.maxIngredients = 4, // Optionally limit the number of ingredients
   });
 
   @override
@@ -22,96 +19,135 @@ class PreparationArea extends StatefulWidget {
 }
 
 class _PreparationAreaState extends State<PreparationArea> {
-  // Helper function to calculate the list of tags
-  List<String> calculateSatisfiesTags(List<Ingredient> ingredients) {
-    return ingredients.expand((ingredient) => ingredient.dietaryTags).toSet().toList();
+
+  void _removeIngredient(Ingredient ingredient) {
+    setState(() {
+      widget.selectedIngredients.remove(ingredient);
+    });
   }
 
-  // Function to determine which dishes can be made from selected ingredients
-  List<Dish> getPossibleDishes() {
-    // Placeholder, but you should implement filtering logic here
-    // based on selected ingredients and availableDishes from GameState
-    return Provider.of<GameState>(context, listen: false).availableDishes; 
-  }
-
-  void _addIngredient(Ingredient ingredient) {
-    if (widget.selectedIngredients.length < widget.maxIngredients) {
-      setState(() {
-        widget.selectedIngredients.add(ingredient);
-      });
-    } else {
-      // Show a message if the limit is reached
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('You cannot add more than ${widget.maxIngredients} ingredients.'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    return DragTarget<Ingredient>(
-      onAccept: (ingredient) {
-        setState(() {
-          _addIngredient(ingredient);
-        });
-      },
-      builder: (context, candidateData, rejectedData) {
-        return Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/images/backgrounds/preparation-area.png'), // Replace with your asset
-              fit: BoxFit.cover,
-            ),
-            borderRadius: BorderRadius.circular(20.0),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.9),
-                spreadRadius: 3,
-                blurRadius: 5,
-                offset: Offset(0, 3), 
-              ),
-            ],
+    // The background image for the preparation area
+    final String backgroundImage = 'assets/images/backgrounds/preparation-area.png';
+    // The target area image, e.g., an outline of a bowl or a cutting board
+    // final String targetAreaImage = 'assets/images/target-area.png';
+
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(backgroundImage),
+          fit: BoxFit.cover,
+        ),
+        borderRadius: BorderRadius.circular(20.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            spreadRadius: 3,
+            blurRadius: 5,
+            offset: Offset(0, 3),
           ),
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              Image.asset('assets/images/environment/pot.png', height: 200),
-              SizedBox(height: 15),
-              Wrap(
-                children: widget.selectedIngredients.map((ingredient) => 
-                  Container(
-                    margin: const EdgeInsets.all(4.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        final gameState = Provider.of<GameState>(context, listen: false); // Access GameState
-                        setState(() {
-                          ingredient.isSelected = !ingredient.isSelected;
-                          // Update isSelected in your main availableIngredients in GameState
-                          final matchingIngredient = gameState.availableIngredients.firstWhere((i) => i.name == ingredient.name);
-                          matchingIngredient.isSelected = ingredient.isSelected; 
-                        });
-                        gameState.checkObjective1Completion(widget.selectedIngredients);
-                      },
-                      child: Chip( 
-                        avatar: Image.asset(ingredient.imageUrl, height: 25),
-                        label: Text(ingredient.name),
-                        backgroundColor: ingredient.isSelected ? Colors.green : Colors.grey, 
-                        onDeleted: () {
-                          setState(() {
-                            widget.selectedIngredients.remove(ingredient);
-                            ingredient.isSelected = false; 
-                          });
-                        }, 
-                      ),
-                    ),
-                  ),
-                ).toList(),
-              ),
-              SizedBox(height: 20),
-              Consumer<GameState>(
+        ],
+      ),
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        children: [
+          Image.asset('assets/images/environment/pot.png', height: 100),
+          SizedBox(height: 10),
+          Flexible(
+            child: DragTarget<Ingredient>(
+              onAccept: (ingredient) {
+                _handleAcceptIngredient(ingredient);
+              },
+              builder: (context, candidateData, rejectedData) {
+                return ListView.builder(
+                    scrollDirection: Axis.horizontal, // Set this to horizontal
+                    itemCount: widget.selectedIngredients.length,
+                    itemBuilder: (context, index) {
+                      final ingredient = widget.selectedIngredients[index];
+                      return Draggable<Ingredient>(
+                        data: ingredient,
+                        feedback: Material(
+                          child: _buildIngredientTile(ingredient), // Material is needed for the dragged item
+                          elevation: 4.0,
+                        ),
+                        childWhenDragging: Container(
+                          width: 60, // Match the size of the ingredient tile
+                          height: 60,
+                          decoration: BoxDecoration(
+                            // Maybe a border to show an empty space
+                          ),
+                        ),
+                        onDragStarted: () {
+                          // Handle drag start if necessary
+                        },
+                        onDraggableCanceled: (velocity, offset) {
+                          _removeIngredient(ingredient); // Remove the ingredient if dragged back
+                        },
+                        onDragEnd: (details) {
+                          // This is called when the drag does not end on a DragTarget.
+                          if (!details.wasAccepted) {
+                            setState(() {
+                              // Assuming you have a method to increase the waste count.
+                              context.read<GameState>().incrementWaste(ingredient);
+                              // Then remove the ingredient from the selection.
+                              widget.selectedIngredients.removeAt(index);
+                            });
+                          }
+                        },
+                        child: _buildIngredientTile(ingredient), // Normal state
+                      );
+                    },
+                  );
+              },
+            ),
+          ),
+          // Expanded(
+          //   child: DragTarget<Ingredient>(
+          //     onAccept: (ingredient) {
+          //       if (widget.selectedIngredients.length < widget.maxIngredients) {
+          //         setState(() {
+          //           widget.selectedIngredients.add(ingredient);
+          //         });
+          //       } else {
+          //         ScaffoldMessenger.of(context).showSnackBar(
+          //           SnackBar(content: Text("Maximum ingredients reached.")),
+          //         );
+          //       }
+          //     },
+          //     builder: (context, candidateData, rejectedData) {
+          //       return Stack(
+          //         alignment: Alignment.center,
+          //         children: [
+
+          //           Expanded(
+          //             child: ListView.builder(
+          //               itemCount: widget.selectedIngredients.length,
+          //               itemBuilder: (context, index) {
+          //                 final ingredient = widget.selectedIngredients[index];
+          //                 return Draggable<Ingredient>(
+          //                   data: ingredient,
+          //                   axis: Axis.horizontal,
+          //                   feedback: Material(
+          //                     child: _buildIngredientTile(ingredient, index), // Use the custom method for the dragging state
+          //                     elevation: 4.0,
+          //                   ),
+  
+          //                   childWhenDragging: Container(), // Empty container instead of the ingredient
+          //                   onDragStarted: () {
+          //                     // Handle drag start if necessary
+          //                   },
+          //                   onDraggableCanceled: (velocity, offset) {
+          //                     _removeIngredient(ingredient); // Call this method when the drag is canceled
+          //                   },
+               
+          //                   child: _buildIngredientTile(ingredient, index), // Use the custom method for the normal state
+          //                 );
+          //               },
+          //             ),
+          //           ),
+          Consumer<GameState>(
                 builder: (context, gameState, child) {
                   return ElevatedButton(
                     onPressed: () {
@@ -139,10 +175,86 @@ class _PreparationAreaState extends State<PreparationArea> {
                   );
                 },
               ),
-            ],
-          ),
-        ); 
-      },
+              // Positioned(
+              //   top: 0, // Adjust position based on where the bin is located
+              //   right: 0,
+              //   child: DragTarget<Ingredient>(
+              //     onWillAccept: (ingredient) => true, // Accept all ingredients
+              //     onAccept: (ingredient) {
+              //       _removeIngredient(ingredient);
+              //     },
+              //     builder: (context, candidateData, rejectedData) {
+              //       return Icon(
+              //         Icons.delete, // The bin icon
+              //         color: const Color.fromARGB(255, 133, 67, 63),
+              //         size: 20, // Size of the bin icon
+              //       );
+              //     },
+              //   ),
+              // ),
+        ],
+      ),
+);
+  }
+
+
+    Widget _buildIngredientTile(Ingredient ingredient, {bool isDragging = false}) {
+  return Container(
+    width: 60, // Set the width to fit the image
+    height: 60, // Set the height to fit the image
+    decoration: BoxDecoration(
+      color: ingredient.isSelected ? Colors.green.withOpacity(0.5) : Colors.transparent,
+      border: Border.all(
+        color: ingredient.isSelected ? Colors.green : Colors.transparent, // Border color when selected
+        width: 2, // Border width
+      ),
+      borderRadius: BorderRadius.circular(10), // Adjust the radius to fit your design
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(8.0), // Padding inside the container
+      child: Image.asset(
+        ingredient.imageUrl,
+        fit: BoxFit.contain, // Contain the image within the available space
+      ),
+    ),
+  );
+}
+
+void _handleAcceptIngredient(Ingredient ingredient) {
+    if (widget.selectedIngredients.length <= widget.maxIngredients && !widget.selectedIngredients.contains(ingredient)) {
+      setState(() {
+        widget.selectedIngredients.add(ingredient);
+        // Automatically select the ingredient when added to the preparation area
+        ingredient.isSelected = true;
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Maximum ingredients reached or ingredient already added.")),
+      );
+    }
+  }
+
+  Widget _buildBin() {
+    return Positioned(
+      top: 0, // Adjust position based on where the bin is located
+      right: 0,
+      child: DragTarget<Ingredient>(
+        // Existing bin DragTarget code
+        onWillAccept: (ingredient) => true, // Accept all ingredients
+    onAccept: (ingredient) {
+      _removeIngredient(ingredient);
+    },
+    builder: (context, candidateData, rejectedData) {
+      return Icon(
+        Icons.delete, // The bin icon
+        color: const Color.fromARGB(255, 133, 67, 63),
+        size: 20, // Size of the bin icon
+        
+      );
+    }
+      )
     );
   }
+
+
 }

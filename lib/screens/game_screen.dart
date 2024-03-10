@@ -223,13 +223,16 @@ Widget build(BuildContext context) {
             Expanded(
               flex: 3,
               child: SingleChildScrollView(
-              child: Center(child: Row(children: gameState.availableIngredients.map((ingredient) => IngredientWidget(ingredient)).toList(),)),
+                scrollDirection: Axis.horizontal,
+              child: Center(
+                child: Row(children: gameState.availableIngredients.map((ingredient) => IngredientWidget(ingredient)).toList(),)),
               ),
               // child: Wrap(
               //   children: gameState.availableIngredients.map((ingredient) => IngredientWidget(ingredient)).toList(),
               // ),
             ),
             SizedBox(
+              height:300,
               child: PreparationArea(selectedIngredients: gameState.selectedIngredients),
             ),
             
@@ -237,12 +240,6 @@ Widget build(BuildContext context) {
           ],
         );
       },
-    ),
-    // Positioned ObjectiveTracker without Flexible
-    Positioned(
-      top: 100,
-      right: 20,
-      child: ObjectiveTracker(),
     ),
   ],
 ),
