@@ -24,7 +24,7 @@ class _LevelSummaryScreenState extends State<LevelSummaryScreen> {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('images/backgrounds/level-summary-background.png'), // Your actual background image
+            image: AssetImage('assets/images/backgrounds/level-summary-background.png'), // Your actual background image
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
               Colors.white.withOpacity(0.7), BlendMode.dstATop), // Lighten the image for better text readability

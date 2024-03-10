@@ -57,9 +57,7 @@ class _PreparationAreaState extends State<PreparationArea> {
           SizedBox(height: 10),
           Flexible(
             child: DragTarget<Ingredient>(
-              onAccept: (ingredient) {
-                _handleAcceptIngredient(ingredient);
-              },
+              onAccept: _handleAcceptIngredient,
               builder: (context, candidateData, rejectedData) {
                 return ListView.builder(
                     scrollDirection: Axis.horizontal, // Set this to horizontal
@@ -103,50 +101,6 @@ class _PreparationAreaState extends State<PreparationArea> {
               },
             ),
           ),
-          // Expanded(
-          //   child: DragTarget<Ingredient>(
-          //     onAccept: (ingredient) {
-          //       if (widget.selectedIngredients.length < widget.maxIngredients) {
-          //         setState(() {
-          //           widget.selectedIngredients.add(ingredient);
-          //         });
-          //       } else {
-          //         ScaffoldMessenger.of(context).showSnackBar(
-          //           SnackBar(content: Text("Maximum ingredients reached.")),
-          //         );
-          //       }
-          //     },
-          //     builder: (context, candidateData, rejectedData) {
-          //       return Stack(
-          //         alignment: Alignment.center,
-          //         children: [
-
-          //           Expanded(
-          //             child: ListView.builder(
-          //               itemCount: widget.selectedIngredients.length,
-          //               itemBuilder: (context, index) {
-          //                 final ingredient = widget.selectedIngredients[index];
-          //                 return Draggable<Ingredient>(
-          //                   data: ingredient,
-          //                   axis: Axis.horizontal,
-          //                   feedback: Material(
-          //                     child: _buildIngredientTile(ingredient, index), // Use the custom method for the dragging state
-          //                     elevation: 4.0,
-          //                   ),
-  
-          //                   childWhenDragging: Container(), // Empty container instead of the ingredient
-          //                   onDragStarted: () {
-          //                     // Handle drag start if necessary
-          //                   },
-          //                   onDraggableCanceled: (velocity, offset) {
-          //                     _removeIngredient(ingredient); // Call this method when the drag is canceled
-          //                   },
-               
-          //                   child: _buildIngredientTile(ingredient, index), // Use the custom method for the normal state
-          //                 );
-          //               },
-          //             ),
-          //           ),
           Consumer<GameState>(
                 builder: (context, gameState, child) {
                   return ElevatedButton(
@@ -175,23 +129,6 @@ class _PreparationAreaState extends State<PreparationArea> {
                   );
                 },
               ),
-              // Positioned(
-              //   top: 0, // Adjust position based on where the bin is located
-              //   right: 0,
-              //   child: DragTarget<Ingredient>(
-              //     onWillAccept: (ingredient) => true, // Accept all ingredients
-              //     onAccept: (ingredient) {
-              //       _removeIngredient(ingredient);
-              //     },
-              //     builder: (context, candidateData, rejectedData) {
-              //       return Icon(
-              //         Icons.delete, // The bin icon
-              //         color: const Color.fromARGB(255, 133, 67, 63),
-              //         size: 20, // Size of the bin icon
-              //       );
-              //     },
-              //   ),
-              // ),
         ],
       ),
 );
@@ -221,17 +158,13 @@ class _PreparationAreaState extends State<PreparationArea> {
 }
 
 void _handleAcceptIngredient(Ingredient ingredient) {
-    if (widget.selectedIngredients.length <= widget.maxIngredients && !widget.selectedIngredients.contains(ingredient)) {
-      setState(() {
+    setState(() {
+      if (!widget.selectedIngredients.contains(ingredient)) {
         widget.selectedIngredients.add(ingredient);
-        // Automatically select the ingredient when added to the preparation area
+        // Mark the ingredient as selected
         ingredient.isSelected = true;
-      });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Maximum ingredients reached or ingredient already added.")),
-      );
-    }
+      }
+    });
   }
 
   Widget _buildBin() {

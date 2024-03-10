@@ -3,38 +3,57 @@ import '../models/ingredient.dart';
 
 class IngredientWidget extends StatelessWidget {
   final Ingredient ingredient;
+
   IngredientWidget(this.ingredient);
 
   @override
   Widget build(BuildContext context) {
-    return Draggable(
+    // Wrap the container in a Draggable widget
+    return Draggable<Ingredient>(
+      // Data to be transferred
       data: ingredient,
-      child: Container(
-        margin: const EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-          color: Color(0xFF8B4513), // Woody brown color
-          borderRadius: BorderRadius.circular(8.0), // Rounded corners for wooden frames
+      // The widget to display as the item is being dragged
+      feedback: Material(
+        color: Colors.transparent, // Make the Material widget's background transparent
+        child: Image.asset(
+          ingredient.imageUrl,
+          width: 50, // Match the width in the Container below
+          height: 50, // Match the height in the Container below
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(ingredient.imageUrl, height: 60),
-            SizedBox(height: 5),
-            Text(
-              ingredient.name,
-              style: TextStyle(color: Colors.white), // Set text color to white
+        elevation: 0, // Remove any shadow
+      ),
+      // The widget that remains in place where the Draggable widget was originally
+      childWhenDragging: Container(), // You can decide to show nothing or a placeholder
+      // The widget displayed when not dragging
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 4.0), // Adds a little space between each ingredient
+        padding: EdgeInsets.all(8.0), // Padding inside the box
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.7), // Semi-transparent white background
+          borderRadius: BorderRadius.circular(8), // Rounded corners
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 1,
+              blurRadius: 3,
+              offset: Offset(0, 1),
             ),
           ],
         ),
-      ),
-      feedback: Opacity(
-        opacity: 0.6,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Color(0xFF8B4513), // Woody brown color
-            borderRadius: BorderRadius.circular(8.0), // Rounded corners for wooden frames
-          ),
-          child: Image.asset(ingredient.imageUrl, height: 80),
+        child: Column(
+          mainAxisSize: MainAxisSize.min, // Use the minimum space
+          children: <Widget>[
+            Image.asset(
+              ingredient.imageUrl,
+              width: 50, // Set a fixed width for the image
+              height: 50, // Set a fixed height for the image
+            ),
+            Text(
+              ingredient.name,
+              style: TextStyle(fontSize: 12), // Smaller font size
+              overflow: TextOverflow.ellipsis, // Prevent long names from breaking the layout
+            ),
+          ],
         ),
       ),
     );

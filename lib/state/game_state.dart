@@ -155,7 +155,7 @@ class GameState with ChangeNotifier {
 
       if (dishMatched) {
         _score += 20; // Increment the score.
-        _showFeedback('Delicious! The guest loved it!', context);
+        _showFeedback('Delicious! ${currentGuest.name} loved it!', context);
         currentGuest.isSatisfied = true;
 
         // Add the dish to the list of made dishes
@@ -174,6 +174,7 @@ class GameState with ChangeNotifier {
       _showFeedback('Almost! Did you mean to make a ${closestMatch.name}?', context);
     }
 
+    checkObjective1Completion(ingredientsForDish);
     checkObjective2Completion(ingredientsForDish); // Check after dish creation
     deselectIngredients(ingredientsForDish);
     ingredientsForDish.clear();
@@ -607,14 +608,17 @@ Future<void> updatePlayerLevelAndCheckUnlocks(int newScore, BuildContext context
       // Objective 1: Select Tomato and Spinach...
       print('current level objectives:');
       print(currentLevel!.objectives);
+      bool allGuestsSatisfied = _currentGuests.every((guest) => guest.isSatisfied);
       final objective1 = currentLevel!.objectives.firstWhere((obj) => obj.id == "1-1");
-      if (availableIngredients.any((ingredient) => ingredient.name == 'Tomato' && ingredient.isSelected) && availableIngredients.any((ingredient) => ingredient.name == 'Spinach' && ingredient.isSelected)) {
+      if (allGuestsSatisfied) {
         objective1.complete();
       }
       print(objective1.isCompleted);
 
       notifyListeners();
     }
+
+
 
     // Objective 2: Combine selected ingredients...
     void checkObjective2Completion(List<Ingredient> selectedIngredients) {
