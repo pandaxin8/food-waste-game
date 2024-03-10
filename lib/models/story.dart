@@ -4,14 +4,14 @@ class StorySegment {
   final String id;
   final String text;
   final Character character;
-  final String? imagePath;
+  final List<String>? imagePaths;
   final List<String>? choices;
 
   StorySegment({
     required this.id,
     required this.text,
     required this.character,
-    this.imagePath,
+    this.imagePaths,
     this.choices,
   });
   // ... Additional methods and properties as needed ...

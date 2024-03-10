@@ -26,9 +26,10 @@ class MainMenuScreen extends StatelessWidget {
                 onPressed: () async {
                   // Handle New Game action
                   //Provider.of<GameState>(context, listen: false).startNewGame(context); 
-                  await Provider.of<GameState>(context, listen: false).startNewGame(context); // Await for startNewGame to complete 
-                  Navigator.pushReplacementNamed(context, AppRoutes.gameScreen);
-                  Provider.of<GameState>(context, listen: false).loadCurrentPlayerData();
+                  // await Provider.of<GameState>(context, listen: false).startNewGame(context); // Await for startNewGame to complete 
+                  // Navigator.pushReplacementNamed(context, AppRoutes.gameScreen);
+                  // Provider.of<GameState>(context, listen: false).loadCurrentPlayerData();
+                  Navigator.pushReplacementNamed(context, AppRoutes.introCutScene);
                 },
                 child: Text('New Game'),
                 style: ElevatedButton.styleFrom(

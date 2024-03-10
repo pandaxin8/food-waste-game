@@ -94,6 +94,23 @@ flutter:
     - assets/images/dishes/creamy-cashew-curry.png
     - assets/sounds/background-music.mp3
     - assets/images/icons/
+    - assets/images/scenes/divided-cityscape.png
+    - assets/images/scenes/cozy-home.png
+    - assets/images/scenes/young-gus.png
+    - assets/images/scenes/gus-family.png
+    - assets/images/scenes/flashback-1.png
+    - assets/images/scenes/flashback-2.png
+    - assets/images/scenes/exterior-style-1.png
+    - assets/images/scenes/early-interior-1.png
+    - assets/images/scenes/picking.png
+    - assets/images/scenes/prepping.png
+    - assets/images/scenes/serving.png
+    - assets/images/scenes/ingredient-pad.png
+    - assets/images/scenes/gus-motivation.png
+    - assets/images/scenes/gus-mishap.png
+    - assets/images/scenes/gus-entrance-rally.png
+    - assets/images/avatars/gus.png
+
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

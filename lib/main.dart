@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:food_waste_game/screens/sign_in_screen.dart';
 import 'package:food_waste_game/services/firebase_options.dart';
+import 'package:food_waste_game/widgets/intro_cut_scene.dart';
 import 'package:provider/provider.dart';
 import '../state/game_state.dart';
 import '../screens/main_menu_screen.dart';
@@ -15,7 +16,8 @@ import 'package:food_waste_game/services/background_music_service.dart';
 class AppRoutes {
   static const mainMenu = '/';
   static const gameScreen = '/game';
-  static const signIn = '/signIn'; // Define signIn route
+  static const signIn = '/signIn'; 
+  static const introCutScene = '/introCutScene'; 
 }
 
 Future<void> main() async {
@@ -90,6 +92,7 @@ class _MyAppState extends State<MyApp> {
                 // AppRoutes.gameScreen: (context) => GameScreen(),
                 AppRoutes.signIn: (context) => SignInScreen(), 
                 // Ensure you have a level to pass, this might require fetching from GameState or similar
+                AppRoutes.introCutScene: (context) => IntroCutscene(),
                 AppRoutes.gameScreen: (context) {
                   // Ensure you have a level to pass, this might require fetching from GameState or similar
                   final gameState = Provider.of<GameState>(context, listen: false);
