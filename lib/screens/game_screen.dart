@@ -98,33 +98,17 @@ class GameScreen extends StatelessWidget {
               }
             }
 
-          return GridView.builder(
-            padding: EdgeInsets.all(8),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-            ),
+            return ListView.builder(
             itemCount: dishesToShow.length,
             itemBuilder: (context, index) {
               Dish dish = dishesToShow[index];
-              return Card(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Image(
-                        image: AssetImage(dish.imagePath), // Use AssetImage for the image provider
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(8),
-                      child: Text(dish.name, style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                    // You can add more details such as prep time or tags here
-                  ],
-                ),
+              return ExpansionTile(
+                title: Text(dish.name, style: TextStyle(fontWeight: FontWeight.bold)),
+                leading: Image.asset(dish.imagePath, fit: BoxFit.cover),
+                children: dish.ingredients.map((ingredient) => ListTile(
+                  title: Text(ingredient.name),
+                  trailing: Text(ingredient.freshness.toString()), // Placeholder for ingredient quantity
+                )).toList(),
               );
             },
           );
@@ -238,11 +222,17 @@ Widget build(BuildContext context) {
           children: [
             Expanded(
               flex: 3,
-              child: Wrap(
-                children: gameState.availableIngredients.map((ingredient) => IngredientWidget(ingredient)).toList(),
+              child: SingleChildScrollView(
+              child: Center(child: Row(children: gameState.availableIngredients.map((ingredient) => IngredientWidget(ingredient)).toList(),)),
               ),
+              // child: Wrap(
+              //   children: gameState.availableIngredients.map((ingredient) => IngredientWidget(ingredient)).toList(),
+              // ),
             ),
-            PreparationArea(selectedIngredients: gameState.selectedIngredients),
+            SizedBox(
+              child: PreparationArea(selectedIngredients: gameState.selectedIngredients),
+            ),
+            
             WasteMeter(wasteLevel: gameState.wasteAmount),
           ],
         );

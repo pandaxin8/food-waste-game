@@ -8,6 +8,7 @@ class Guest {
   final List<String> preferences;
   final List<String> dietaryRestrictions;
   final int maxCalories; // calorie limit
+  bool isSatisfied = false;
 
   Guest({
     required this.name,
@@ -15,6 +16,7 @@ class Guest {
     required this.preferences,
     required this.dietaryRestrictions,
     required this.maxCalories,
+    required this.isSatisfied,
   });
 
   factory Guest.fromDocument(DocumentSnapshot doc) {
@@ -24,6 +26,7 @@ class Guest {
       preferences: List<String>.from(doc.get('preferences')), // Cast preferences as List<String>
       dietaryRestrictions: List<String>.from(doc.get('dietaryRestrictions')),
       maxCalories: doc.get('maxCalories') as int,
+      isSatisfied: false,
     );
   }
 

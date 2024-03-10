@@ -67,21 +67,21 @@ void _startImagePathTimer() {
 }
 
   void _nextSegment() {
-  _imagePathTimer?.cancel(); 
-  if (_currentSegmentIndex < _segments.length - 1) {
-    _currentImagePathIndex = 0; // Reset Image Index
-    _pageController.animateToPage(
-      ++_currentSegmentIndex,
-      duration: Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-    _startImagePathTimer(); // Start image cycling for the new segment 
-  } else {
-    // Game logic when you reach the last segment
-    Navigator.pushReplacementNamed(context, AppRoutes.gameScreen);
+    _imagePathTimer?.cancel(); 
+    if (_currentSegmentIndex < _segments.length - 1) {
+      _currentImagePathIndex = 0; // Reset Image Index
+      _pageController.animateToPage(
+        ++_currentSegmentIndex,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+      _startImagePathTimer(); // Start image cycling for the new segment 
+    } else {
+      // Navigate to the tutorial screen instead of the game screen
+      Navigator.pushReplacementNamed(context, AppRoutes.tutorial);
+    }
   }
 
-}
 
 
 
@@ -250,17 +250,36 @@ Widget build(BuildContext context) {
           ),
         ),
       ),
-      // Continue button
+      // Container for Continue and Skip buttons
       Positioned(
         right: 16,
         bottom: 16,
-        child: ElevatedButton(
-          onPressed: _nextSegment,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xFF8D6E63), // Wood color button
-            foregroundColor : Colors.white, // Text color
-          ),
-          child: Text('Continue'),
+        child: Row(
+          mainAxisSize: MainAxisSize.min, // To wrap the content of the row
+          children: [
+            // Skip button
+            ElevatedButton(
+              onPressed: () {
+                _imagePathTimer?.cancel(); // Stop any running timers
+                Navigator.pushReplacementNamed(context, AppRoutes.tutorial); // Change this to your desired route
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 102, 46, 42), // Color for the skip button
+                foregroundColor: Colors.white, // Text color
+              ),
+              child: Text('Skip'),
+            ),
+            SizedBox(width: 8), // Spacing between Skip and Continue buttons
+            // Continue button
+            ElevatedButton(
+              onPressed: _nextSegment,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF8D6E63), // Wood color button
+                foregroundColor: Colors.white, // Text color
+              ),
+              child: Text('Continue'),
+            ),
+          ],
         ),
       ),
     ],

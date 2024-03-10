@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:food_waste_game/screens/sign_in_screen.dart';
+import 'package:food_waste_game/screens/tutorial_screen.dart';
 import 'package:food_waste_game/services/firebase_options.dart';
 import 'package:food_waste_game/widgets/intro_cut_scene.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +11,7 @@ import '../screens/game_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:food_waste_game/services/background_music_service.dart';
 
+
 // Import additional screen files as you create them
 
 
@@ -18,6 +20,7 @@ class AppRoutes {
   static const gameScreen = '/game';
   static const signIn = '/signIn'; 
   static const introCutScene = '/introCutScene'; 
+  static const tutorial = '/tutorial';
 }
 
 Future<void> main() async {
@@ -86,6 +89,14 @@ class _MyAppState extends State<MyApp> {
             ],
             child: MaterialApp(
               title: 'Green Paw Chefs',
+              theme: ThemeData(
+                primarySwatch: Colors.green, // Use a green swatch
+                primaryColor: Colors.green.shade400,
+                primaryColorDark: Colors.green.shade800,
+                // If you need a specific green, define it like this:
+                // primaryColor: Color(0xFF4CAF50), // Replace with your desired green color code
+                // Define other theme properties as needed
+              ),
               initialRoute: AppRoutes.mainMenu,
               routes: {
                 AppRoutes.mainMenu: (context) => MainMenuScreen(),
@@ -93,6 +104,7 @@ class _MyAppState extends State<MyApp> {
                 AppRoutes.signIn: (context) => SignInScreen(), 
                 // Ensure you have a level to pass, this might require fetching from GameState or similar
                 AppRoutes.introCutScene: (context) => IntroCutscene(),
+                AppRoutes.tutorial: (context) => InteractiveTutorialScreen(),
                 AppRoutes.gameScreen: (context) {
                   // Ensure you have a level to pass, this might require fetching from GameState or similar
                   final gameState = Provider.of<GameState>(context, listen: false);

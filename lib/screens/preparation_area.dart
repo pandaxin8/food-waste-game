@@ -3,13 +3,19 @@ import 'package:food_waste_game/models/ingredient.dart';
 import 'package:provider/provider.dart';
 import '../models/dish.dart'; 
 import '../state/game_state.dart';
+import 'dart:math' as math; 
 
 
 
 class PreparationArea extends StatefulWidget {
+  
   final List<Ingredient> selectedIngredients;
+  final int maxIngredients;
 
-  PreparationArea({required this.selectedIngredients});
+  PreparationArea({
+    required this.selectedIngredients,
+    this.maxIngredients = 5, // Set the maximum number of ingredients allowed
+  });
 
   @override
   _PreparationAreaState createState() => _PreparationAreaState();
@@ -28,12 +34,28 @@ class _PreparationAreaState extends State<PreparationArea> {
     return Provider.of<GameState>(context, listen: false).availableDishes; 
   }
 
+  void _addIngredient(Ingredient ingredient) {
+    if (widget.selectedIngredients.length < widget.maxIngredients) {
+      setState(() {
+        widget.selectedIngredients.add(ingredient);
+      });
+    } else {
+      // Show a message if the limit is reached
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('You cannot add more than ${widget.maxIngredients} ingredients.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return DragTarget<Ingredient>(
       onAccept: (ingredient) {
         setState(() {
-          widget.selectedIngredients.add(ingredient);
+          _addIngredient(ingredient);
         });
       },
       builder: (context, candidateData, rejectedData) {

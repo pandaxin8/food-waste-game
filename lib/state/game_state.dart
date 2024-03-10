@@ -9,9 +9,11 @@ import 'package:food_waste_game/screens/game_screen.dart';
 import 'package:food_waste_game/screens/level_summary_screen.dart';
 import 'package:food_waste_game/services/data_service.dart';
 import 'package:food_waste_game/widgets/notification_widget.dart';
+import 'package:provider/provider.dart';
 import '../models/ingredient.dart';
 import '../models/guest.dart';
 import '../models/dish.dart';
+
 
 
 
@@ -92,7 +94,7 @@ class GameState with ChangeNotifier {
   Future<void> startNewGame(BuildContext context) async {
     _score = 0;
     _wasteAmount = 0;
-    await _loadLevel(_currentLevel);
+    await loadLevel(_currentLevel);
     // showLevelStartModal(context);
     _availableDishes = await _dataService.getDishesForLevel(_currentLevel);
     notifyListeners();
@@ -144,7 +146,7 @@ class GameState with ChangeNotifier {
       //   unlockLevel: 1,
       //   imagePath: '',
       // );
-      Dish dish = findClosestRecipeMatch(selectedIngredients);
+      Dish dish = findClosestRecipeMatch(context, selectedIngredients);
 
       // Check if the created dish satisfies the current guest's preferences.
       // Assuming one guest for MVP. Update logic for multiple guests.
@@ -154,6 +156,7 @@ class GameState with ChangeNotifier {
       if (dishMatched) {
         _score += 20; // Increment the score.
         _showFeedback('Delicious! The guest loved it!', context);
+        currentGuest.isSatisfied = true;
 
         // Add the dish to the list of made dishes
         _madeDishes.add(dish);
@@ -167,7 +170,7 @@ class GameState with ChangeNotifier {
     } else {
       // _showFeedback('This combination doesn\'t make a dish.', context);
       // Provide a hint about what dish they might have been trying to make
-      Dish closestMatch = findClosestRecipeMatch(ingredientsForDish);
+      Dish closestMatch = findClosestRecipeMatch(context, selectedIngredients);
       _showFeedback('Almost! Did you mean to make a ${closestMatch.name}?', context);
     }
 
@@ -180,9 +183,30 @@ class GameState with ChangeNotifier {
       _showFeedback("These ingredients went to waste: $wastedIngredientsList", context);
       _wasteAmount += 10 * unselectedIngredients.length;
     }
+
+    print('currentGuests: $currentGuests');
+
+    for (int i = 0; i < currentGuests.length; i++) { 
+    Guest guest = currentGuests[i];
+    // if (guest.isSatisfied) continue; // Skip already satisfied guests
+
+    if (guest.isSatisfied) {
+      print('guest is satisfied');
+      
+      // Remove the satisfied guest (assuming simple removal from the top is desired)
+      currentGuests.removeAt(i); 
+
+      notifyListeners(); // Notify listeners to update the UI 
+      break; // Stop checking guests if one is satisfied
+    }
+  }
+
+
     notifyListeners(); // Notify UI to rebuild.
     
   }
+
+
 
   void resetLevelState() {
     _madeDishes.clear();
@@ -197,7 +221,7 @@ class GameState with ChangeNotifier {
   }
 
   // Helper method to find the closest recipe match based on selected ingredients
-  Dish findClosestRecipeMatch(List<Ingredient> selectedIngredients) {
+  Dish findClosestRecipeMatch(BuildContext context, List<Ingredient> selectedIngredients) {
     // Implement logic to find the closest matching recipe
     // This could be based on the number of matching ingredients
     // ...
@@ -219,7 +243,7 @@ class GameState with ChangeNotifier {
     }
 
     // Return the dish with the most matches (or an empty dish if none match)
-    return closestMatch ?? Dish(name: '', ingredients: [], prepTime: 0, satisfiesTags: [], unlockLevel: 1, imagePath: '');
+    return closestMatch ?? Provider.of<GameState>(context, listen: false).availableDishes.first;;
   }
 
 
@@ -409,7 +433,7 @@ Future<void> updatePlayerLevelAndCheckUnlocks(int newScore, BuildContext context
   }
 
 
-  Future<void> _loadLevel(int levelNumber) async { // Change return type to Future<void>
+  Future<void> loadLevel(int levelNumber) async { // Change return type to Future<void>
     DocumentSnapshot levelDoc = await FirebaseFirestore.instance.collection('levels').doc('level-$levelNumber').get();
     if (levelDoc.exists) {
       currentLevel = await Level.fromDocument(levelDoc); 
