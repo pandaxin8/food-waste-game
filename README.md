@@ -9,8 +9,11 @@ Features
 - Progressive Difficulty: Levels increase in complexity, introducing guests with more complex dietary restrictions and preferences.
 - Educational Content: Learn tips and facts about food sustainability, seasonal ingredients, and waste reduction.
 - Unlockable Content: Achieve certain milestones to unlock new recipes, kitchen upgrades, and chef avatars.
-  
-## Installation instructions
+
+## Game Application Testing installation - for game testers
+[App distribution ver 1.0.0 by firebase](https://appdistribution.firebase.google.com/testerapps/1:740392261000:android:dbeeaeb31e68e89fe3163d/releases/5ccdjirmqaooo?utm_source=firebase-console)
+
+## Repository Installation instructions
 
 To install and run the Food Waste Awareness Game, follow these steps:
 1. Ensure you have Flutter installed on your machine. If not, follow the installation guide on the Flutter official website.
