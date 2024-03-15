@@ -11,7 +11,7 @@ Features
 - Unlockable Content: Achieve certain milestones to unlock new recipes, kitchen upgrades, and chef avatars.
 
 ## Game Application Testing installation - for game testers
-[App distribution ver 1.0.0 by firebase](https://appdistribution.firebase.google.com/testerapps/1:740392261000:android:dbeeaeb31e68e89fe3163d/releases/5ccdjirmqaooo?utm_source=firebase-console)
+[App distribution ver 1.0.0 by firebase for Android devices](https://appdistribution.firebase.google.com/testerapps/1:740392261000:android:dbeeaeb31e68e89fe3163d/releases/5ccdjirmqaooo?utm_source=firebase-console)
 
 ## Repository Installation instructions
 
