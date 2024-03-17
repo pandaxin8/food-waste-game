@@ -13,9 +13,7 @@ import 'package:provider/provider.dart';
 import '../models/ingredient.dart';
 import '../models/guest.dart';
 import '../models/dish.dart';
-
-
-
+import 'package:collection/collection.dart';
 
 
 
@@ -38,6 +36,8 @@ class GameState with ChangeNotifier {
   List<Ingredient> _selectedIngredients = [];
 
   List<Dish> _madeDishes = [];
+
+  Map<String, List<Dish>> dishesServedToGuests = {};
 
 
   Future<void> _loadInitialData() async {
@@ -97,14 +97,22 @@ class GameState with ChangeNotifier {
     await loadLevel(_currentLevel);
     // showLevelStartModal(context);
     _availableDishes = await _dataService.getDishesForLevel(_currentLevel);
+    _currentGuests = await _dataService.getGuestsForLevel(_currentLevel);
     notifyListeners();
     
   }
 
   // Simple feedback display (also in GameState)
-  void _showFeedback(String message, BuildContext context) {
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  void _showFeedback(String message, [BuildContext? context]) {
+  if (context != null) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  } else {
+    // Handle the case where no context is available
+    // This might mean logging the message, showing a console output, or using a global key to access the current scaffold
+    print(message); // Simplest form of feedback
+  }
 }
+
 
   void pauseGame() {
     _isPaused = true;
@@ -125,10 +133,6 @@ class GameState with ChangeNotifier {
     // 1. Find Unselected Ingredients in Preparation Area:
     final unselectedIngredients = selectedIngredients.where((ingredient) => !ingredient.isSelected).toList(); 
 
-  // 2. Handle the unselected ingredients (you have options):
-    // Option A: Directly penalize waste
-      // _wasteAmount += calculateWastePenalty(unselectedIngredients); // You'll need to define how the penalty is calculated
-
     // Check if any ingredients remain (in case none were selected):
     if(ingredientsForDish.isEmpty) {
       _showFeedback('Please select some ingredients before cooking', context);
@@ -137,32 +141,49 @@ class GameState with ChangeNotifier {
     // Check if the selected ingredients can form a valid dish.
     if (canFormDish(ingredientsForDish)) {
       print('submitDish: can form a valid dish');
-      // If they can, create the dish and check against the guest's preferences.
-      // Dish dish = Dish(
-      //   name: 'Custom Dish', // You might want to generate a name based on ingredients.
-      //   ingredients: ingredientsForDish,
-      //   prepTime: 10, // Placeholder value for prepTime.
-      //   satisfiesTags: calculateSatisfiesTags(ingredientsForDish),
-      //   unlockLevel: 1,
-      //   imagePath: '',
-      // );
+
       Dish dish = findClosestRecipeMatch(context, selectedIngredients);
 
       // Check if the created dish satisfies the current guest's preferences.
       // Assuming one guest for MVP. Update logic for multiple guests.
       Guest currentGuest = _currentGuests.first;
-      bool dishMatched = currentGuest.isSatisfiedBy(dish);
+      bool dishMatched = dish.doesSatisfyDietaryRestrictions(currentGuest);//currentGuest.isSatisfiedBy(dish);
 
       if (dishMatched) {
+        // Update dishes served to the current guest
+            dishesServedToGuests.update(currentGuest.name, (existingDishes) {
+              return existingDishes..add(dish);
+            }, ifAbsent: () => [dish]);
+
         _score += 20; // Increment the score.
         _showFeedback('Delicious! ${currentGuest.name} loved it!', context);
+        if (currentGuest.name != "Dan") {
         currentGuest.isSatisfied = true;
+        }
+        if (currentGuest.name == "Dan" && dishesServedToGuests["Dan"] != null) {
+          if (dishesServedToGuests["Dan"]!.length == 2) {
+          currentGuest.isSatisfied = true;
+          }
+        }
 
         // Add the dish to the list of made dishes
         _madeDishes.add(dish);
+
+        if (_currentLevel == 1) {
+          checkObjective1Completion(ingredientsForDish);
+          checkObjective2Completion(ingredientsForDish); // Check after dish creation
+        }
+
+        if (_currentLevel == 2) {
+                // Also, check if serving this dish completes any objective
+                bool wasteGenerated = determineWasteGenerated(selectedIngredients);
+                checkObjective3Completion(currentGuest, wasteGenerated);
+                checkObjective4Completion(context);
+            }
+
       } else {
         _wasteAmount += 10; // Increment the waste amount.
-        _showFeedback('Oh no! The guest did not like it.', context);
+        _showFeedback('Oh no! ${currentGuest.name} did not like it.', context);
       }
 
       // Clear the selected ingredients after submission.
@@ -174,8 +195,7 @@ class GameState with ChangeNotifier {
       _showFeedback('Almost! Did you mean to make a ${closestMatch.name}?', context);
     }
 
-    checkObjective1Completion(ingredientsForDish);
-    checkObjective2Completion(ingredientsForDish); // Check after dish creation
+    
     deselectIngredients(ingredientsForDish);
     ingredientsForDish.clear();
 
@@ -207,6 +227,21 @@ class GameState with ChangeNotifier {
     
   }
 
+  // Method to determine waste generation (simplified example)
+bool determineWasteGenerated(List<Ingredient> selectedIngredients) {
+    // Implement your logic to check if waste was generated during dish preparation.
+    // For simplicity, let's assume waste is generated if any ingredient is unused.
+    return selectedIngredients.any((ingredient) => !ingredient.isSelected);
+}
+
+// Method to track dishes served to Dan (example implementation)
+// void trackDishesServedToDan(Dish dish) {
+//     // This method could update a list tracking the dishes served to Dan.
+//     // You might maintain a count or list of dishes specifically for Dan.
+//     // Check if completing the "Serve Dan Two Dishes" objective is applicable here.
+//     checkObjective4Completion([...], _currentGuests.firstWhere((guest) => guest.name == "Dan"));
+// }
+
 
 
   void resetLevelState() {
@@ -216,10 +251,13 @@ class GameState with ChangeNotifier {
 
   void deselectIngredients(List<Ingredient> ingredients) {
     for (Ingredient ingredient in ingredients) {
-      final matchingIngredient = availableIngredients.firstWhere((i) => i.name == ingredient.name);
-      matchingIngredient.isSelected = false; 
+      final matchingIngredients = availableIngredients.where((i) => i.name == ingredient.name);
+      if (matchingIngredients.isNotEmpty) {
+        matchingIngredients.first.isSelected = false;
+      }
     }
   }
+
 
   // Helper method to find the closest recipe match based on selected ingredients
   Dish findClosestRecipeMatch(BuildContext context, List<Ingredient> selectedIngredients) {
@@ -356,16 +394,6 @@ class GameState with ChangeNotifier {
     return ingredients.expand((ingredient) => ingredient.dietaryTags).toSet().toList();
   }
 
-  String generateFeedbackForDish(Dish dish, Guest guest) {
-    // Here, you would compare dish.ingredients with guest.dietaryRestrictions and guest.preferences
-    // Then, construct a feedback message based on how well they match
-    // This is a placeholder function for now
-    if (dish.doesSatisfyDietaryRestrictions(guest)) {
-      return 'Perfect match! You\'ve satisfied the guest\'s preferences.';
-    } else {
-      return 'Not quite right. Try these ingredients: ${guest.preferences.join(", ")}';
-    }
-  }
 
   Future<Player?> loadCurrentPlayer() async {
     User? user = FirebaseAuth.instance.currentUser;
@@ -491,18 +519,6 @@ Future<void> updatePlayerLevelAndCheckUnlocks(int newScore, BuildContext context
   }
 
 
-  // void performActionThatCompletesObjective(BuildContext context, Objective objective) {
-  //   // If the objective is not already completed, complete it
-  //   if (!objective.isCompleted) {
-  //     objective.complete();
-
-  //     // Check if all objectives are now completed
-  //     if (checkIfObjectivesCompleted()) {
-  //       onLevelComplete(context);
-  //     }
-  //     notifyListeners();
-  //   }
-  // }
 
   // Method to unlock rewards
   void unlockLevelRewards(BuildContext context) {
@@ -547,6 +563,7 @@ Future<void> updatePlayerLevelAndCheckUnlocks(int newScore, BuildContext context
   // Method to advance to the next level
   Future<void> advanceToNextLevel(BuildContext context) async {
     _currentLevel++;
+    _wasteAmount = 0;
     try {
       DocumentSnapshot levelDoc = await FirebaseFirestore.instance
           .collection('levels')
@@ -556,6 +573,7 @@ Future<void> updatePlayerLevelAndCheckUnlocks(int newScore, BuildContext context
       if (levelDoc.exists) {
         currentLevel = await Level.fromDocument(levelDoc);
         _availableDishes = await _dataService.getDishesForLevel(_currentLevel);
+        _currentGuests = await _dataService.getGuestsForLevel(_currentLevel);
         notifyListeners();
         
         if (currentLevel != null) {
@@ -575,64 +593,81 @@ Future<void> updatePlayerLevelAndCheckUnlocks(int newScore, BuildContext context
   }
 
 
-
-
-    // void showLevelStartModal(BuildContext context) {
-    //   showDialog(
-    //     context: context,
-    //     barrierDismissible: false, // Prevent closing the modal by tapping outside
-    //     builder: (BuildContext context) {
-    //       return AlertDialog(
-    //         title: const Text('Level Objectives'),
-    //         content: Column(
-    //           mainAxisSize: MainAxisSize.min, // Important for scrollable objectives
-    //           children: [
-    //             // Display the objectives here (more on this later)
-    //           ],
-    //         ),
-    //         actions: [
-    //           TextButton(
-    //             onPressed: () {
-    //               Navigator.of(context).pop(); // Dismiss the modal
-    //             },
-    //             child: Text('Got it!'),
-    //           ),
-    //         ],
-    //       );
-    //     },
-    //   );
-    // }
-
-    void checkObjective1Completion(List<Ingredient> selectedIngredients) {
-      print('checking objective completion');
-      // Objective 1: Select Tomato and Spinach...
-      print('current level objectives:');
-      print(currentLevel!.objectives);
-      bool allGuestsSatisfied = _currentGuests.every((guest) => guest.isSatisfied);
-      final objective1 = currentLevel!.objectives.firstWhere((obj) => obj.id == "1-1");
-      if (allGuestsSatisfied) {
-        objective1.complete();
-      }
-      print(objective1.isCompleted);
-
-      notifyListeners();
+   void checkObjective1Completion(List<Ingredient> selectedIngredients) {
+    print('checking objective completion');
+    bool allGuestsSatisfied = _currentGuests.every((guest) => guest.isSatisfied);
+    final objective1 = currentLevel!.objectives.where((obj) => obj.id == "1-1");
+    if (allGuestsSatisfied && objective1.isNotEmpty) {
+      objective1.first.complete();
+      print(objective1.first.isCompleted);
     }
+
+    notifyListeners();
+  }
+
 
 
 
     // Objective 2: Combine selected ingredients...
     void checkObjective2Completion(List<Ingredient> selectedIngredients) {
-      final objective2 = currentLevel!.objectives.firstWhere((obj) => obj.id == "1-2");
-      if (_selectedIngredients.any((ingredient) => ingredient.name == 'Tomato') &&
-          _selectedIngredients.any((ingredient) => ingredient.name == 'Spinach') && _selectedIngredients.length == 2) {
-        objective2.complete();
+      final objective2 = currentLevel!.objectives.where((obj) => obj.id == "1-2");
+      if (objective2.isNotEmpty &&
+          selectedIngredients.any((ingredient) => ingredient.name == 'Tomato') &&
+          selectedIngredients.any((ingredient) => ingredient.name == 'Spinach') &&
+          selectedIngredients.length == 2) {
+        objective2.first.complete();
+        print(objective2.first.isCompleted);
       }
-      print(objective2.isCompleted);
 
       // Notify UI if there were changes:
       notifyListeners();
-
     }
+
+    void checkObjective3Completion(Guest servedGuest, bool wasteGenerated) {
+      // Assuming the ID for this objective is "2-1" for Level 2, Objective 1.
+      final objective3 = currentLevel!.objectives.where((obj) => obj.id == "2-1");
+
+      if (objective3.isNotEmpty &&
+          servedGuest.name == "Quo" &&
+          servedGuest.isSatisfied &&
+          !wasteGenerated) {
+          objective3.first.complete();
+          print(objective3.first.isCompleted);
+          _showFeedback("Objective completed: Serve Quo with Zero Waste", null); // Context might be needed.
+      }
+
+      notifyListeners();
+  }
+
+
+  void checkObjective4Completion(BuildContext context) {
+    final objective4 = currentLevel!.objectives.where((obj) => obj.id == "2-2");
+    Guest? dan = _currentGuests.firstWhereOrNull((guest) => guest.name == "Dan");
+    if (dan != null && dishesServedToGuests.containsKey("Dan")) {
+        List<Dish> dishesServedToDan = dishesServedToGuests["Dan"]!;
+        
+        // You now have a list of dishes served to Dan and can check if the objective is met
+        // This could involve checking the number of dishes and if Dan is satisfied
+        // Ensure this logic matches the specific criteria of the objective
+        if (dishesServedToDan.length >= 2 && dan.isSatisfied) {
+            // Objective met, proceed with completion logic
+            objective4.first.complete();
+            print(objective4.first.isCompleted);
+            _showFeedback("Objective completed: Serve Dan Two Dishes", context);
+            // Mark the objective as completed, etc.
+        }
+    }
+    notifyListeners();
+}
+
+
+
+
+
+
+    
+
+
 
   void showUnlockNotification(BuildContext context, UnlockNotification notification) {
     showDialog(

@@ -23,7 +23,7 @@ class _GuestProfileWidgetState extends State<GuestProfileWidget> {
         margin: const EdgeInsets.symmetric(vertical: 8.0),
         child: Row(
           children: [
-            Image.asset(widget.guest.iconUrl, height: 40), // Use widget.guest.iconUrl here
+            Image.asset(widget.guest.iconUrl, height: 80), // Use widget.guest.iconUrl here
             SizedBox(width: 15),
             Expanded(
               child: Column(

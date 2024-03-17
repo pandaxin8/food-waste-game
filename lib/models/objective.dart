@@ -5,11 +5,15 @@ import 'package:flutter/material.dart';
 class Objective with ChangeNotifier {
   final String id; // Add an 'id' property
   final String description;
+  final String checkFunctionName; // name of check function in ObjectiveCheck
+  //Map<String, dynamic> criteria;
   bool isCompleted;
 
   Objective({
     required this.id, 
     required this.description, 
+    required this.checkFunctionName,
+    //required this.criteria,
     this.isCompleted = false,
     }
   );
@@ -18,6 +22,8 @@ class Objective with ChangeNotifier {
     return Objective(
       id: doc.get('id') as String, // Get document ID
       description: doc.get('description') as String,
+      checkFunctionName: doc.get('checkFunctionName') as String,
+    //  criteria: doc.get('criteria') as Map<String, dynamic>,
       isCompleted: doc.get('isCompleted') as bool? ?? false
     );
   }

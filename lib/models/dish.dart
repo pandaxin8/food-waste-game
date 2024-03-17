@@ -64,6 +64,11 @@ class Dish {
     return 100 - differenceFromLimit; // scale the result if needed
   }
 
+  // Method to calculate the total calories of the dish
+  int calculateTotalCalories() {
+    return ingredients.fold(0, (sum, ingredient) => sum + ingredient.calories);
+  }
+
   // convert Dish to Map, for storing in Firestore
   Map<String, dynamic> toMap() {
     return {
